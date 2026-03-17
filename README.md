@@ -46,7 +46,7 @@ A backend szolgáltatás Spring Boot alapú mikroszolgáltatásként működik:
 A mobil alkalmazás a modern Android fejlesztés legjobb gyakorlatait követi:
 | Technológia | Szerep |
 |---|---|
-| **Kotlin / Java** | Natív teljesítmény és modern nyelvi elemek |
+| **Java** | Natív teljesítmény és modern nyelvi elemek |
 | **MVVM** | Tiszta architektúra (ViewModel + LiveData) |
 | **Retrofit / OkHttp** | Hálózati kommunikáció és WebSocket kezelés |
 | **Room Database** | Helyi SQLite absztrakció az offline működéshez |
@@ -61,18 +61,5 @@ Az alkalmazás rétegelt architektúrát használ. A kliens és a szerver közö
 2.  **WebSocket (STOMP)**: A valós idejű eseményekhez (üzenetküldés, státuszfrissítés, gépelés jelzése).
 
 Az adatok mentése minden esetben duplikált: a szerveroldali központi PostgreSQL mellett az Android kliensen is tárolódnak (Room), így a felhasználói élmény folyamatos marad gyenge hálózati kapcsolat esetén is.
-
----
-
-## Fejlesztési Ütemterv
-
-A projekt fejlesztése több fázisban valósul meg:
-
-1.  **Fázis (Alapok)**: Projekt inicializálása, adatbázis séma felépítése.
-2.  **Fázis (Auth)**: JWT alapú regisztráció és beléptetés implementálása mindkét oldalon.
-3.  **Fázis (Rooms)**: Csoportos és privát szobák kezelése, REST végpontok kialakítása.
-4.  **Fázis (Real-time)**: WebSocket integráció, üzenettovábbítás STOMP protokollal.
-5.  **Fázis (UX & Vizualitás)**: Design polírozás és szobánkénti témák (színek, hátterek) implementálása.
-6.  **Fázis (QA)**: Tesztelés, bugfix és dokumentáció véglegesítése.
 
 ---
