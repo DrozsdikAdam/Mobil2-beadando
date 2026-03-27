@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">RealTimeChatApplication</string>
+    <string name="toolbar_title">Realtime chat app</string>
+    <string name="test_name">Test Name</string>
+    <string name="test_last_message">Very interesting message for the user</string>
+    <string name="test_timestamp">14:20</string>
+    <string name="user_name_1">Teszt Elek</string>
+    <string name="message_1">Szia! Mi újság?</string>
+    <string name="time_1">12:00</string>
+    <string name="user_name_2">Kovács Anna</string>
+    <string name="message_2">Mikor találkozunk?</string>
+    <string name="time_2">11:45</string>
+    <string name="user_name_3">Nagy Gábor</string>
+    <string name="message_3">Elküldtem a fájlt.</string>
+    <string name="time_3">09:30</string>
+    <string name="user_name_4">Szabó Bence</string>
+    <string name="message_4">Köszi a segítséget!</string>
+    <string name="time_yesterday">Tegnap</string>
+    <string name="user_name_5">Horváth Dóra</string>
+    <string name="message_5">Szia, mizu?</string>
+    <string name="menu_search">Keresés</string>
+    <string name="menu_chats">Chatek</string>
+    <string name="menu_add">Hozzáadás</string>
+    <string name="menu_profile">Profil</string>
 </resources>

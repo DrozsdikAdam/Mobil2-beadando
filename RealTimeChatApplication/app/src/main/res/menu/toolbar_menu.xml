@@ -4,6 +4,6 @@
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search"
-        android:title="Keresés"
+        android:title="@string/menu_search"
         app:showAsAction="always" />
 </menu>

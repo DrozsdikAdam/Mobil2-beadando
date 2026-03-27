@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#242424"
-    >
+    android:background="@color/DarkBg">
 
     <item
         android:id="@+id/nav_chats"
         android:icon="@drawable/ic_chat"
-        android:title="Chatek" />
+        android:title="@string/menu_chats" />
 
     <item
         android:id="@+id/nav_add"
         android:icon="@drawable/ic_add"
-        android:title="Hozzáadás" />
+        android:title="@string/menu_add" />
 
     <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/ic_person"
-        android:title="Profil" />
+        android:title="@string/menu_profile" />
 
 </menu>
