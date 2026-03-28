@@ -1,5 +1,6 @@
 package com.example.realtimechatbackend.controller;
 
+import com.example.realtimechatbackend.dto.AuthResponseDto;
 import com.example.realtimechatbackend.dto.LoginRequestDto;
 import com.example.realtimechatbackend.dto.RegisterRequestDto;
 import com.example.realtimechatbackend.service.AuthService;
@@ -17,14 +18,12 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequestDto registerRequest){
-        authService.register(registerRequest);
-        return ResponseEntity.ok("Registered successfully");
+    public ResponseEntity<AuthResponseDto> register(@RequestBody RegisterRequestDto registerRequest){
+        return ResponseEntity.ok(authService.register(registerRequest));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequest){
-        authService.login(loginRequest);
-        return ResponseEntity.ok("Logged in successfully");
+    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginRequestDto loginRequest){
+        return ResponseEntity.ok(authService.login(loginRequest));
     }
 }
