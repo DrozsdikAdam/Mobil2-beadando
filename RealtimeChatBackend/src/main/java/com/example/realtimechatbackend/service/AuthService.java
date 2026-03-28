@@ -1,5 +1,6 @@
 package com.example.realtimechatbackend.service;
 
+import com.example.realtimechatbackend.dto.AuthResponseDto;
 import com.example.realtimechatbackend.dto.LoginRequestDto;
 import com.example.realtimechatbackend.dto.RegisterRequestDto;
 import com.example.realtimechatbackend.exception.InvalidCredentialsException;
@@ -19,8 +20,9 @@ import java.util.Optional;
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public void register(RegisterRequestDto registerRequest) {
+    public AuthResponseDto register(RegisterRequestDto registerRequest) {
         if (userRepository.existsByUsernameAndIsDeletedFalse(registerRequest.getUsername())) {
             throw new UserAlreadyExistsException("Username already exists!");
         }
@@ -44,9 +46,14 @@ public class AuthService {
         user.setIsOnline(false);
 
         userRepository.save(user);
+
+        var jwtToken = jwtService.generateToken(user.getUsername());
+        return AuthResponseDto.builder()
+                .token(jwtToken)
+                .build();
     }
 
-    public void login(LoginRequestDto loginRequest) {
+    public AuthResponseDto login(LoginRequestDto loginRequest) {
         Optional<User> optionalUser = userRepository.findByEmailAndIsDeletedFalse(loginRequest.getEmail());
 
         if (optionalUser.isEmpty()) {
@@ -62,5 +69,10 @@ public class AuthService {
         user.setIsOnline(true);
 
         userRepository.save(user);
+
+        var jwtToken = jwtService.generateToken(user.getUsername());
+        return AuthResponseDto.builder()
+                .token(jwtToken)
+                .build();
     }
 }
