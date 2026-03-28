@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class Message {
     @GeneratedValue
     private UUID id;
     private String content;
+    @CreationTimestamp
     private LocalDateTime timestamp;
 
     @ManyToOne
