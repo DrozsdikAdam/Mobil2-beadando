@@ -24,6 +24,7 @@ public class Message {
     private String content;
     @CreationTimestamp
     private LocalDateTime timestamp;
+    private Boolean isDeleted;
 
     @ManyToOne
     @JoinColumn(name = "sender_id")

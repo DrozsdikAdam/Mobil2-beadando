@@ -10,10 +10,7 @@ import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Getter
@@ -25,6 +22,7 @@ public class ChatRoom {
     private UUID id;
     private String name;
     private Boolean isGroup;
+    private Boolean isDeleted;
 
     @OneToOne
     private Message lastMessage;
