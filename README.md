@@ -68,8 +68,8 @@ Az adatok mentése minden esetben duplikált: a szerveroldali központi PostgreS
 
 ### Ádám
 - [x] főoldal
-- [ ] chat oldal
-- [ ] csoport létrehozás
+- [x] chat oldal
+- [x] csoport létrehozás
 
 ### Richárd
 - [ ] profil
