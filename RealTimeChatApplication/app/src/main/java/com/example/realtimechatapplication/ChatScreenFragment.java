@@ -60,6 +60,15 @@ public class ChatScreenFragment extends Fragment {
         recyclerViewMessages.setLayoutManager(layoutManager);
         recyclerViewMessages.setAdapter(messageAdapter);
 
+        // Vissza gomb bekötése
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    getActivity().onBackPressed();
+                }
+            });
+        }
+
         // Küldés gomb
         btnSend.setOnClickListener(v -> {
             String text = etMessage.getText().toString().trim();
