@@ -22,4 +22,10 @@
     <string name="menu_chats">Chatek</string>
     <string name="menu_add">Hozzáadás</string>
     <string name="menu_profile">Profil</string>
+    <string name="go_back_arrow">Go back arrow</string>
+    <string name="csoport_l_trehoz_sa">Csoport létrehozása</string>
+    <string name="csoport_neve">Csoport neve</string>
+    <string name="csoport_l_trehoz_s">Csoport Létrehozás</string>
+    <string name="tagok_hozz_ad_sa">Tagok hozzáadása</string>
+    <string name="friend_name">Ismerős neve</string>
 </resources>
