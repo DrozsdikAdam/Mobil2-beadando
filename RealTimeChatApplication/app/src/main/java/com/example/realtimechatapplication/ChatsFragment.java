@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,8 +36,11 @@ public class ChatsFragment extends Fragment {
         bottomNav.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_add) {
+                showAddOptionsDialog();
+                return true;
+            } else if (itemId == R.id.nav_settings) {
                 getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new CreateGroupFragment())
+                        .replace(R.id.fragment_container, new fragment_profile())
                         .addToBackStack(null)
                         .commit();
                 return true;
@@ -58,5 +62,31 @@ public class ChatsFragment extends Fragment {
 
         chatAdapter = new ChatAdapter(chatList);
         recyclerView.setAdapter(chatAdapter);
+    }
+
+    private void showAddOptionsDialog() {
+        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        View view = getLayoutInflater().inflate(R.layout.layout_add_options, null);
+
+        // Ismerős hozzáadása opció
+        view.findViewById(R.id.optionAddContact).setOnClickListener(v -> {
+            dialog.dismiss();
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new fragment_add_contact())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        // Csoport létrehozása opció
+        view.findViewById(R.id.optionCreateGroup).setOnClickListener(v -> {
+            dialog.dismiss();
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new CreateGroupFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        dialog.setContentView(view);
+        dialog.show();
     }
 }
