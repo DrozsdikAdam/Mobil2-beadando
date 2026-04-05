@@ -22,10 +22,42 @@
     <string name="menu_chats">Chatek</string>
     <string name="menu_add">Hozzáadás</string>
     <string name="menu_profile">Profil</string>
-    <string name="go_back_arrow">Go back arrow</string>
+    <string name="go_back_arrow">Vissza</string>
     <string name="csoport_l_trehoz_sa">Csoport létrehozása</string>
     <string name="csoport_neve">Csoport neve</string>
     <string name="csoport_l_trehoz_s">Csoport Létrehozás</string>
     <string name="tagok_hozz_ad_sa">Tagok hozzáadása</string>
     <string name="friend_name">Ismerős neve</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="login_title">Bejelentkezés</string>
+    <string name="email_hint">Email cím</string>
+    <string name="password_hint">Jelszó</string>
+    <string name="login_button">Bejelentkezés</string>
+    <string name="registration_text">Nincs fiókja? Regisztráció</string>
+    <string name="registration_title">Regisztráció</string>
+    <string name="username_hint">Felhasználónév</string>
+    <string name="register_button">Regisztráció</string>
+    <string name="back_to_login_text">Van már fiókja? Bejelentkezés</string>
+
+    <!-- Profile strings -->
+    <string name="username">Felhasználónév</string>
+    <string name="profile_status">Online</string>
+    <string name="profile_details">Profil adatok</string>
+    <string name="password_placeholder">********</string>
+    <string name="modify">Módosítás</string>
+    <string name="change_profile_image">Profilkép módosítása</string>
+    <string name="general_settings">Általános beállítások</string>
+    <string name="dark_mode">Sötét mód</string>
+    <string name="language">Nyelv</string>
+    <string name="lang_en">English</string>
+    <string name="lang_hu">Magyar</string>
+    <string name="ui_color_setting">UI Színbeállítás</string>
+    <string name="logout">Kijelentkezés</string>
+
+    <!-- Add Contact strings -->
+    <string name="add_contact_title">Ismerős hozzáadása</string>
+    <string name="search_hint">Név vagy email keresése</string>
+    <string name="add_friend">Hozzáadás</string>
+    <string name="suggested_friends">Javasolt ismerősök</string>
 </resources>
