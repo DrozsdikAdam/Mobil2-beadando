@@ -3,13 +3,20 @@ package com.example.realtimechatapplication.ui;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.adapters.ChatAdapter;
 import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.models.ChatModel;
@@ -23,6 +30,7 @@ public class ChatsFragment extends Fragment {
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
     private List<ChatModel> chatList;
+    private MainViewModel mainViewModel;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -34,22 +42,31 @@ public class ChatsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Bottom Navigation kezelése
+        // ViewModel inicializálása
+        mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+
+        mainViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+        });
+
+        // Navigáció beállítása
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        NavController navController = Navigation.findNavController(view);
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.chatsFragment, R.id.loginFragment)
+                .build();
+        
+        NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
+
         BottomNavigationView bottomNav = view.findViewById(R.id.bottom_navigation);
-        bottomNav.setSelectedItemId(R.id.nav_chats);
+        NavigationUI.setupWithNavController(bottomNav, navController);
+
         bottomNav.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_add) {
                 showAddOptionsDialog();
                 return true;
-            } else if (itemId == R.id.nav_settings) {
-                getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new ProfileFragment())
-                        .addToBackStack(null)
-                        .commit();
-                return true;
             }
-            return itemId == R.id.nav_chats;
+            return NavigationUI.onNavDestinationSelected(item, navController);
         });
 
         // RecyclerView inicializálása
@@ -71,23 +88,16 @@ public class ChatsFragment extends Fragment {
     private void showAddOptionsDialog() {
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
         View view = getLayoutInflater().inflate(R.layout.layout_add_options, null);
+        NavController navController = Navigation.findNavController(requireView());
 
-        // Ismerős hozzáadása opció
         view.findViewById(R.id.optionAddContact).setOnClickListener(v -> {
             dialog.dismiss();
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new AddContactFragment())
-                    .addToBackStack(null)
-                    .commit();
+            navController.navigate(R.id.addContactFragment);
         });
 
-        // Csoport létrehozása opció
         view.findViewById(R.id.optionCreateGroup).setOnClickListener(v -> {
             dialog.dismiss();
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new CreateGroupFragment())
-                    .addToBackStack(null)
-                    .commit();
+            navController.navigate(R.id.createGroupFragment);
         });
 
         dialog.setContentView(view);

@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.example.realtimechatapplication.R;
 import com.google.android.material.button.MaterialButton;
@@ -34,24 +35,18 @@ public class RegistrationFragment extends Fragment {
 
         //Regisztráció -> Chats
         registerButton.setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new ChatsFragment())
-                    .commit();
+            Navigation.findNavController(view).navigate(R.id.chatsFragment);
         });
 
-        //Vissza -> Login
+        //Vissza a NavController stack-jén
         backToLoginLink.setOnClickListener(v -> {
-            if (getActivity() != null) {
-                getActivity().onBackPressed();
-            }
+            Navigation.findNavController(view).popBackStack();
         });
 
-        //Vissza -> Login
+        //Vissza a NavController stack-jén
         if (backButton != null) {
             backButton.setOnClickListener(v -> {
-                if (getActivity() != null) {
-                    getActivity().onBackPressed();
-                }
+                Navigation.findNavController(view).popBackStack();
             });
         }
     }
