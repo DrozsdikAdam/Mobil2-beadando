@@ -1,4 +1,4 @@
-package com.example.realtimechatapplication;
+package com.example.realtimechatapplication.ui;
 
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -9,6 +9,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.example.realtimechatapplication.adapters.ChatAdapter;
+import com.example.realtimechatapplication.R;
+import com.example.realtimechatapplication.models.ChatModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import java.util.ArrayList;
@@ -40,7 +44,7 @@ public class ChatsFragment extends Fragment {
                 return true;
             } else if (itemId == R.id.nav_settings) {
                 getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new fragment_profile())
+                        .replace(R.id.fragment_container, new ProfileFragment())
                         .addToBackStack(null)
                         .commit();
                 return true;
@@ -72,7 +76,7 @@ public class ChatsFragment extends Fragment {
         view.findViewById(R.id.optionAddContact).setOnClickListener(v -> {
             dialog.dismiss();
             getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new fragment_add_contact())
+                    .replace(R.id.fragment_container, new AddContactFragment())
                     .addToBackStack(null)
                     .commit();
         });

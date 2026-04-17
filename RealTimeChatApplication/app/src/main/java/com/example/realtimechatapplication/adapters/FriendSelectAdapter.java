@@ -1,4 +1,4 @@
-package com.example.realtimechatapplication;
+package com.example.realtimechatapplication.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +8,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.realtimechatapplication.R;
+import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.imageview.ShapeableImageView;
 import java.util.List;
 

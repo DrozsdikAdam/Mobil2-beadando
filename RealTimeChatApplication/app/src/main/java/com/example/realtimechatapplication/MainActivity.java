@@ -3,6 +3,8 @@ package com.example.realtimechatapplication;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.realtimechatapplication.ui.SplashFragment;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override

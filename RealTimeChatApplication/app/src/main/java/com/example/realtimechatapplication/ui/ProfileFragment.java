@@ -1,4 +1,4 @@
-package com.example.realtimechatapplication;
+package com.example.realtimechatapplication.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,14 +11,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-public class fragment_profile extends Fragment {
+import com.example.realtimechatapplication.R;
+
+public class ProfileFragment extends Fragment {
 
     private ImageButton backButton;
     private LinearLayout profileDetailsHeader;
     private LinearLayout profileDetailsContent;
     private ImageView dropdownArrow;
 
-    public fragment_profile() {
+    public ProfileFragment() {
         // Required empty public constructor
     }
 

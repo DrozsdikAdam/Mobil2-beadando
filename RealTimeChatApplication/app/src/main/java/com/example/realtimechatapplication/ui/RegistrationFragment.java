@@ -1,4 +1,4 @@
-package com.example.realtimechatapplication;
+package com.example.realtimechatapplication.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,11 +8,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.example.realtimechatapplication.R;
 import com.google.android.material.button.MaterialButton;
 
-public class fragment_registration extends Fragment {
+public class RegistrationFragment extends Fragment {
 
-    public fragment_registration() {
+    public RegistrationFragment() {
         // Required empty public constructor
     }
 

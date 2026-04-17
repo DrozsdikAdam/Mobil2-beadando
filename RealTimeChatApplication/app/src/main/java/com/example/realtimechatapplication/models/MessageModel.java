@@ -1,4 +1,4 @@
-package com.example.realtimechatapplication;
+package com.example.realtimechatapplication.models;
 
 public class MessageModel {
 

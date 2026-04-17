@@ -1,4 +1,4 @@
-package com.example.realtimechatapplication;
+package com.example.realtimechatapplication.ui;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.example.realtimechatapplication.R;
 
 public class SplashFragment extends Fragment {
 
@@ -26,7 +28,7 @@ public class SplashFragment extends Fragment {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (isAdded()) {
                 getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new fragment_login())
+                        .replace(R.id.fragment_container, new LoginFragment())
                         .commit();
             }
         }, 1000);

@@ -1,4 +1,4 @@
-package com.example.realtimechatapplication;
+package com.example.realtimechatapplication.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,6 +12,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.realtimechatapplication.adapters.FriendSelectAdapter;
+import com.example.realtimechatapplication.R;
+import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
