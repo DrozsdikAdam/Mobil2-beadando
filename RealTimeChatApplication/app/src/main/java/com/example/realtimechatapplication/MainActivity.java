@@ -2,18 +2,30 @@ package com.example.realtimechatapplication;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.NavigationUI;
 
 public class MainActivity extends AppCompatActivity {
+
+    private NavController navController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new SplashFragment())
-                    .commit();
+        // NavHostFragment keresése és NavController inicializálása
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_container);
+        if (navHostFragment != null) {
+            navController = navHostFragment.getNavController();
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        // Ez kezeli a Toolbar vissza gombját a NavController-rel
+        return navController.navigateUp() || super.onSupportNavigateUp();
     }
 }

@@ -1,0 +1,74 @@
+package com.example.realtimechatapplication;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
+import com.example.realtimechatapplication.models.MessageModel;
+import com.example.realtimechatapplication.models.UserModel;
+
+import java.util.List;
+
+public class MainViewModel extends ViewModel {
+    
+    private final MutableLiveData<UserModel> currentUser = new MutableLiveData<>();
+    private final MutableLiveData<String> selectedChatPartnerName = new MutableLiveData<>();
+    private final MutableLiveData<String> selectedChatId = new MutableLiveData<>();
+    private final MutableLiveData<List<MessageModel>> currentChatMessages = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
+    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+
+    // Getters
+    public LiveData<UserModel> getCurrentUser() {
+        return currentUser;
+    }
+
+    public LiveData<String> getSelectedChatPartnerName() {
+        return selectedChatPartnerName;
+    }
+
+    public LiveData<String> getSelectedChatId() {
+        return selectedChatId;
+    }
+
+    public LiveData<List<MessageModel>> getCurrentChatMessages() {
+        return currentChatMessages;
+    }
+
+    public LiveData<Boolean> getIsLoading() {
+        return isLoading;
+    }
+
+    public LiveData<String> getErrorMessage() {
+        return errorMessage;
+    }
+
+    // Setters
+    public void setCurrentUser(UserModel user) {
+        this.currentUser.setValue(user);
+    }
+
+    public void setSelectedChatPartnerName(String partnerName) {
+        this.selectedChatPartnerName.setValue(partnerName);
+    }
+
+    public void setSelectedChatId(String id) {
+        this.selectedChatId.setValue(id);
+    }
+
+    public void setCurrentChatMessages(List<MessageModel> messages) {
+        this.currentChatMessages.setValue(messages);
+    }
+
+    public void setIsLoading(boolean isLoading) {
+        this.isLoading.setValue(isLoading);
+    }
+
+    public void setErrorMessage(String message) {
+        this.errorMessage.setValue(message);
+    }
+
+    public void clearError() {
+        this.errorMessage.setValue(null);
+    }
+}

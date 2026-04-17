@@ -1,4 +1,4 @@
-package com.example.realtimechatapplication;
+package com.example.realtimechatapplication.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,11 +8,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavOptions;
+import androidx.navigation.Navigation;
+
+import com.example.realtimechatapplication.R;
 import com.google.android.material.button.MaterialButton;
 
-public class fragment_login extends Fragment {
+public class LoginFragment extends Fragment {
 
-    public fragment_login() {
+    public LoginFragment() {
         // Required empty public constructor
     }
 
@@ -30,16 +34,16 @@ public class fragment_login extends Fragment {
         TextView registrationLink = view.findViewById(R.id.RegistrationLink);
 
         loginButton.setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new ChatsFragment())
-                    .commit();
+            // Bejelentkezéskor töröljük a LoginFragment-et a visszalépési listából
+            NavOptions navOptions = new NavOptions.Builder()
+                    .setPopUpTo(R.id.loginFragment, true)
+                    .build();
+            
+            Navigation.findNavController(view).navigate(R.id.chatsFragment, null, navOptions);
         });
 
         registrationLink.setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new fragment_registration())
-                    .addToBackStack(null)
-                    .commit();
+            Navigation.findNavController(view).navigate(R.id.registrationFragment);
         });
     }
 }
