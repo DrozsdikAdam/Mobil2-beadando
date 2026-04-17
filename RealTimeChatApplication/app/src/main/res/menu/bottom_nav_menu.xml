@@ -3,7 +3,7 @@
     android:background="@color/DarkBg">
 
     <item
-        android:id="@+id/nav_chats"
+        android:id="@+id/chatsFragment"
         android:icon="@drawable/ic_chat"
         android:title="@string/menu_chats" />
 
@@ -13,7 +13,7 @@
         android:title="@string/menu_add" />
 
     <item
-        android:id="@+id/nav_settings"
+        android:id="@+id/profileFragment"
         android:icon="@drawable/ic_person"
         android:title="@string/menu_profile" />
 
