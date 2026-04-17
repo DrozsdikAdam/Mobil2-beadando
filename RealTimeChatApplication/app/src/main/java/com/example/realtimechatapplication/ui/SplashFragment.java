@@ -16,6 +16,14 @@ import com.example.realtimechatapplication.R;
 
 public class SplashFragment extends Fragment {
 
+    private static final String ARG_DESTINATION = "destination_id";
+
+    public static Bundle createArgs(int destinationId) {
+        Bundle args = new Bundle();
+        args.putInt(ARG_DESTINATION, destinationId);
+        return args;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -26,13 +34,20 @@ public class SplashFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1 mp után navigáció a LoginFragment-re, eltávolítva a Splash-t a backstack-ről
+        int destinationId = R.id.loginFragment;
+        if (getArguments() != null && getArguments().containsKey(ARG_DESTINATION)) {
+            destinationId = getArguments().getInt(ARG_DESTINATION);
+        }
+
+        final int finalDestinationId = destinationId;
+
+        // 1 mp után navigáció a cél fragmentre, eltávolítva a Splash-t a backstack-ről
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (isAdded()) {
                 NavOptions navOptions = new NavOptions.Builder()
                         .setPopUpTo(R.id.splashFragment, true)
                         .build();
-                Navigation.findNavController(view).navigate(R.id.loginFragment, null, navOptions);
+                Navigation.findNavController(view).navigate(finalDestinationId, null, navOptions);
             }
         }, 1000);
     }
