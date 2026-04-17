@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
 import com.example.realtimechatapplication.R;
@@ -33,7 +34,12 @@ public class LoginFragment extends Fragment {
         TextView registrationLink = view.findViewById(R.id.RegistrationLink);
 
         loginButton.setOnClickListener(v -> {
-            Navigation.findNavController(view).navigate(R.id.chatsFragment);
+            // Bejelentkezéskor töröljük a LoginFragment-et a visszalépési listából
+            NavOptions navOptions = new NavOptions.Builder()
+                    .setPopUpTo(R.id.loginFragment, true)
+                    .build();
+            
+            Navigation.findNavController(view).navigate(R.id.chatsFragment, null, navOptions);
         });
 
         registrationLink.setOnClickListener(v -> {

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
 import com.example.realtimechatapplication.R;
@@ -25,10 +26,13 @@ public class SplashFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1 mp után navigáció a LoginFragment-re
+        // 1 mp után navigáció a LoginFragment-re, eltávolítva a Splash-t a backstack-ről
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (isAdded()) {
-                Navigation.findNavController(view).navigate(R.id.loginFragment);
+                NavOptions navOptions = new NavOptions.Builder()
+                        .setPopUpTo(R.id.splashFragment, true)
+                        .build();
+                Navigation.findNavController(view).navigate(R.id.loginFragment, null, navOptions);
             }
         }, 1000);
     }

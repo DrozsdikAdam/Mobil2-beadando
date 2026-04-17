@@ -60,8 +60,6 @@ public class ProfileFragment extends Fragment {
             if (user != null) {
                 profileName.setText(user.getUserName());
                 if (editUsername != null) editUsername.setText(user.getUserName());
-                // Email-hez jelenleg nincs mező a UserModel-ben, de ha lenne:
-                // if (editEmail != null) editEmail.setText(user.getEmail());
             }
         });
 

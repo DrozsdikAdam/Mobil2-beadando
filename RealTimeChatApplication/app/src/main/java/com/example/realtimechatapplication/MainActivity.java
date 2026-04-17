@@ -4,6 +4,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.NavigationUI;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,5 +21,11 @@ public class MainActivity extends AppCompatActivity {
         if (navHostFragment != null) {
             navController = navHostFragment.getNavController();
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        // Ez kezeli a Toolbar vissza gombját a NavController-rel
+        return navController.navigateUp() || super.onSupportNavigateUp();
     }
 }

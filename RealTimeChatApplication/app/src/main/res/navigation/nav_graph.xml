@@ -8,37 +8,37 @@
     <fragment
         android:id="@+id/addContactFragment"
         android:name="com.example.realtimechatapplication.ui.AddContactFragment"
-        android:label="AddContactFragment" />
+        android:label="Kapcsolat hozzáadása" />
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.realtimechatapplication.ui.ProfileFragment"
-        android:label="ProfileFragment" />
+        android:label="Profil" />
     <fragment
         android:id="@+id/createGroupFragment"
         android:name="com.example.realtimechatapplication.ui.CreateGroupFragment"
-        android:label="CreateGroupFragment" />
+        android:label="Csoport létrehozása" />
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.example.realtimechatapplication.ui.SplashFragment"
-        android:label="SplashFragment" />
+        android:label="Splash" />
     <fragment
         android:id="@+id/chatScreenFragment"
         android:name="com.example.realtimechatapplication.ui.ChatScreenFragment"
-        android:label="fragment_chat_screen"
+        android:label="Üzenetek"
         tools:layout="@layout/fragment_chat_screen" />
     <fragment
         android:id="@+id/chatsFragment"
         android:name="com.example.realtimechatapplication.ui.ChatsFragment"
-        android:label="fragment_chats"
+        android:label="Chatek"
         tools:layout="@layout/fragment_chats" />
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.realtimechatapplication.ui.LoginFragment"
-        android:label="fragment_login"
+        android:label="Bejelentkezés"
         tools:layout="@layout/fragment_login" />
     <fragment
         android:id="@+id/registrationFragment"
         android:name="com.example.realtimechatapplication.ui.RegistrationFragment"
-        android:label="fragment_registration"
+        android:label="Regisztráció"
         tools:layout="@layout/fragment_registration" />
 </navigation>
