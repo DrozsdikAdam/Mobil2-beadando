@@ -5,12 +5,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.models.ChatModel;
-import com.example.realtimechatapplication.ui.ChatScreenFragment;
 import com.google.android.material.imageview.ShapeableImageView;
 import java.util.List;
 
@@ -37,11 +36,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         holder.profileImage.setImageResource(chat.getProfileImage());
 
         holder.itemView.setOnClickListener(v -> {
-            AppCompatActivity activity = (AppCompatActivity) v.getContext();
-            activity.getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new ChatScreenFragment())
-                    .addToBackStack(null)
-                    .commit();
+            // Jetpack Navigation használata a Fragment tranzakció helyett
+            Navigation.findNavController(v).navigate(R.id.chatScreenFragment);
         });
     }
 
