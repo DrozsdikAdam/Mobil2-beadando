@@ -39,6 +39,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error); // 401 Unauthorized
     }
 
+    @ExceptionHandler(InvalidGroupException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidGroup(InvalidGroupException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error); // 400 Bad Request
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneralException(Exception ex) {
         Map<String, String> error = new HashMap<>();
