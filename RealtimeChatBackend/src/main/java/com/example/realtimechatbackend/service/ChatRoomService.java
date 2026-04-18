@@ -2,6 +2,7 @@ package com.example.realtimechatbackend.service;
 
 import com.example.realtimechatbackend.dto.CreateRoomRequestDto;
 import com.example.realtimechatbackend.dto.CreateRoomResponseDto;
+import com.example.realtimechatbackend.exception.InvalidGroupException;
 import com.example.realtimechatbackend.exception.UserNotFoundException;
 import com.example.realtimechatbackend.model.ChatRoom;
 import com.example.realtimechatbackend.model.User;
@@ -40,6 +41,10 @@ public class ChatRoomService {
                 } else {
                     failedToAdd.add(userId);
                 }
+            }
+
+            if (members.size() < 2) {
+                throw new InvalidGroupException("Cannot create a group without any valid members!");
             }
 
             ChatRoom chatRoom = new ChatRoom();
