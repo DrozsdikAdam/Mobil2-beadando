@@ -10,12 +10,14 @@ import com.example.realtimechatbackend.repository.ChatRoomRepository;
 import com.example.realtimechatbackend.repository.MessageRepository;
 import com.example.realtimechatbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +27,7 @@ public class MessageService {
     private final UserRepository userRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public MessageResponseDto sendMessage(@RequestBody SendMessageRequestDto request, String username) {
+    public MessageResponseDto sendMessage(SendMessageRequestDto request, String username) {
 
         Optional<User> currentUser = userRepository.findByUsernameAndIsDeletedFalse(username);
         if (currentUser.isEmpty()) throw new UserNotFoundException("User not found.");
@@ -33,13 +35,12 @@ public class MessageService {
         Optional<ChatRoom> chatRoom = chatRoomRepository.findById(request.getChatRoomId());
         if (chatRoom.isEmpty()) throw new GroupNotFoundException("Chat room not found.");
 
-        if (chatRoom.get().getUsers().contains(currentUser.get())) throw new UserNotPartOfGroupException("You are not a member of this chat room.");
+        if (!chatRoom.get().getUsers().contains(currentUser.get())) throw new UserNotPartOfGroupException("You are not a member of this chat room.");
 
         Message message = new Message();
         message.setChatRoom(chatRoom.get());
         message.setContent(request.getContent());
         message.setSender(currentUser.get());
-        message.setIsDeleted(false);
         message.setTimestamp(LocalDateTime.now());
 
         Message savedMessage = messageRepository.save(message);
@@ -47,17 +48,37 @@ public class MessageService {
         chatRoom.get().setLastMessage(savedMessage);
         chatRoomRepository.save(chatRoom.get());
 
-
         MessageResponseDto messageResponseDto = MessageResponseDto.builder()
+                .id(savedMessage.getId())
+                .content(savedMessage.getContent())
+                .senderUsername(savedMessage.getSender().getUsername())
+                .chatRoomId(savedMessage.getChatRoom().getId())
+                .timestamp(savedMessage.getTimestamp())
+                .build();
+
+        simpMessagingTemplate.convertAndSend("/group/" + request.getChatRoomId(), messageResponseDto);
+
+        return messageResponseDto;
+    }
+
+    public Page<MessageResponseDto> getRoomMessages(UUID chatRoomId, String username, Pageable pageAble) {
+
+        Optional<User> user = userRepository.findByUsernameAndIsDeletedFalse(username);
+        if( user.isEmpty()) throw new UserNotFoundException("User not found.");
+
+        Optional<ChatRoom> chatRoom = chatRoomRepository.findById(chatRoomId);
+        if(chatRoom.isEmpty()) throw new GroupNotFoundException("Chat room not found.");
+        
+        if(!chatRoom.get().getUsers().contains(user.get())) throw new UserNotPartOfGroupException("You are not a member of this chat room.");
+
+        Page<Message> messages = messageRepository.findByChatRoomOrderByTimestampDesc(chatRoom.get(), pageAble);
+
+        return messages.map(message -> MessageResponseDto.builder()
                 .id(message.getId())
                 .content(message.getContent())
                 .senderUsername(message.getSender().getUsername())
                 .chatRoomId(message.getChatRoom().getId())
                 .timestamp(message.getTimestamp())
-                .build();
-
-        simpMessagingTemplate.convertAndSend("/group/"+request.getChatRoomId(), messageResponseDto);
-
-        return messageResponseDto;
+                .build());
     }
 }
