@@ -18,6 +18,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error); // 409 Conflict
     }
 
+    @ExceptionHandler(UsernameAlreadyInUseException.class)
+    public ResponseEntity<Map<String, String>> handleUsernameAlreadyInUseException(UsernameAlreadyInUseException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error); // 409 Conflict
+    }
+
     @ExceptionHandler(InvalidPasswordFormatException.class)
     public ResponseEntity<Map<String, String>> handleInvalidPasswordFormat(InvalidPasswordFormatException ex) {
         Map<String, String> error = new HashMap<>();
@@ -37,6 +44,13 @@ public class GlobalExceptionHandler {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error); // 401 Unauthorized
+    }
+
+    @ExceptionHandler(InvalidGroupException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidGroup(InvalidGroupException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error); // 400 Bad Request
     }
 
     @ExceptionHandler(Exception.class)
