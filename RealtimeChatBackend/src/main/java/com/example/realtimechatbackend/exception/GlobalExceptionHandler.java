@@ -18,6 +18,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error); // 409 Conflict
     }
 
+    @ExceptionHandler(UsernameAlreadyInUseException.class)
+    public ResponseEntity<Map<String, String>> handleUsernameAlreadyInUseException(UsernameAlreadyInUseException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error); // 409 Conflict
+    }
+
     @ExceptionHandler(InvalidPasswordFormatException.class)
     public ResponseEntity<Map<String, String>> handleInvalidPasswordFormat(InvalidPasswordFormatException ex) {
         Map<String, String> error = new HashMap<>();
