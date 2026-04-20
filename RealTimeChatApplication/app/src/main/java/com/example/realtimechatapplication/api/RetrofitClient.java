@@ -19,6 +19,10 @@ public class RetrofitClient {
         retrofit = null;
     }
 
+    public static String getAuthToken() {
+        return authToken;
+    }
+
     public static ApiService getApiService() {
         if (retrofit == null) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();

@@ -14,13 +14,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.StompClient;
 import ua.naiksoftware.stomp.dto.StompHeader;
 
 public class WebSocketManager {
     private static final String TAG = "WebSocketManager";
-    private static final String WS_URL = "ws://10.0.2.2:8080/ws/websocket"; // Spring default WS endpoint
+    private static final String WS_URL = "ws://10.0.2.2:8080/ws/websocket"; 
 
     private StompClient mStompClient;
     private final Gson gson = new Gson();
@@ -36,15 +38,30 @@ public class WebSocketManager {
         this.messageListener = listener;
     }
 
-    public void connect(String authToken) {
-        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, WS_URL);
+    public boolean isConnected() {
+        return mStompClient != null && mStompClient.isConnected();
+    }
 
-        List<StompHeader> headers = new ArrayList<>();
-        if (authToken != null && !authToken.isEmpty()) {
-            headers.add(new StompHeader("Authorization", "Bearer " + authToken));
+    public void connect(String authToken) {
+        OkHttpClient httpClient = new OkHttpClient.Builder()
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
+                    Request.Builder requestBuilder = original.newBuilder();
+                    if (authToken != null) {
+                        requestBuilder.addHeader("Authorization", "Bearer " + authToken);
+                    }
+                    return chain.proceed(requestBuilder.build());
+                })
+                .build();
+
+        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, WS_URL, null, httpClient);
+
+        List<StompHeader> connectHeaders = new ArrayList<>();
+        if (authToken != null) {
+            connectHeaders.add(new StompHeader("Authorization", "Bearer " + authToken));
         }
 
-        mStompClient.connect(headers);
+        mStompClient.connect(connectHeaders);
 
         Log.d(TAG, "Connecting to WebSocket...");
 
@@ -57,12 +74,15 @@ public class WebSocketManager {
                             Log.d(TAG, "Stomp connection opened");
                             break;
                         case ERROR:
-                            Log.e(TAG, "Stomp connection error", lifecycleEvent.getException());
+                            Log.e(TAG, "Stomp connection error: " + lifecycleEvent.getException().getMessage());
+                            if (messageListener != null) messageListener.onError(lifecycleEvent.getException());
                             break;
                         case CLOSED:
                             Log.d(TAG, "Stomp connection closed");
                             break;
                     }
+                }, throwable -> {
+                    Log.e(TAG, "Lifecycle stream error", throwable);
                 });
 
         compositeDisposable.add(lifecycleDisposable);
@@ -71,29 +91,27 @@ public class WebSocketManager {
     public void subscribeToChat(UUID chatRoomId) {
         if (mStompClient == null) return;
 
-        // Feliratkozás a konkrét szoba üzeneteire
-        // A backend kódod alapján a topic neve valószínűleg /topic/rooms/{id}
         String topic = "/topic/rooms/" + chatRoomId.toString();
+        Log.d(TAG, "Subscribing to topic: " + topic);
 
         Disposable topicDisposable = mStompClient.topic(topic)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(topicMessage -> {
-                    Log.d(TAG, "Received message from topic: " + topicMessage.getPayload());
+                    Log.d(TAG, "Received message: " + topicMessage.getPayload());
                     if (messageListener != null) {
                         MessageResponseDto message = gson.fromJson(topicMessage.getPayload(), MessageResponseDto.class);
                         messageListener.onMessageReceived(message);
                     }
                 }, throwable -> {
-                    Log.e(TAG, "Error on subscribe topic", throwable);
-                    if (messageListener != null) messageListener.onError(throwable);
+                    Log.e(TAG, "Subscription error", throwable);
                 });
 
         compositeDisposable.add(topicDisposable);
     }
 
     public void sendMessage(String content, UUID chatRoomId) {
-        if (mStompClient == null || !mStompClient.isConnected()) {
+        if (!isConnected()) {
             Log.e(TAG, "Cannot send message: Stomp client not connected");
             return;
         }
@@ -101,7 +119,6 @@ public class WebSocketManager {
         SendMessageRequestDto request = new SendMessageRequestDto(content, chatRoomId);
         String jsonPayload = gson.toJson(request);
 
-        // A backend MessageController @MessageMapping("/chat.sendMessage") miatt:
         mStompClient.send("/app/chat.sendMessage", jsonPayload)
                 .subscribe(() -> {
                     Log.d(TAG, "Message sent successfully");
