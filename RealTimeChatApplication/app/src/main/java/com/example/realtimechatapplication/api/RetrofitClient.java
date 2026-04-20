@@ -1,28 +1,50 @@
 package com.example.realtimechatapplication.api;
 
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
 
-    // Emulátor esetén a 10.0.2.2 felel meg a gép localhost-jának
     private static final String BASE_URL = "http://10.0.2.2:8080/";
     private static Retrofit retrofit = null;
+    private static String authToken = null;
+
+    // Metódus a token beállításához (bejelentkezés után)
+    public static void setAuthToken(String token) {
+        authToken = token;
+        // Ha változik a token, újra kell építeni a Retrofitet, hogy az új klienst használja
+        retrofit = null;
+    }
 
     public static ApiService getApiService() {
         if (retrofit == null) {
-            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .addInterceptor(interceptor)
-                    .build();
+            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
+                    .addInterceptor(loggingInterceptor);
+
+            // Token Interceptor hozzáadása
+            clientBuilder.addInterceptor(chain -> {
+                Request original = chain.request();
+                Request.Builder requestBuilder = original.newBuilder();
+
+                // Ha van elmentett tokenünk, hozzáadjuk a fejléchez
+                if (authToken != null && !authToken.isEmpty()) {
+                    requestBuilder.header("Authorization", "Bearer " + authToken);
+                }
+
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
+            });
 
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create())
-                    .client(client)
+                    .client(clientBuilder.build())
                     .build();
         }
         return retrofit.create(ApiService.class);
