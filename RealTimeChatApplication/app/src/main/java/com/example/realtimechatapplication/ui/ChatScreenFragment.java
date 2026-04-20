@@ -151,11 +151,15 @@ public class ChatScreenFragment extends Fragment {
                 mainViewModel.setIsLoading(false);
                 if (response.isSuccessful() && response.body() != null) {
                     messageList.clear();
-                    for (MessageResponseDto dto : response.body().getContent()) {
-                        messageList.add(mapDtoToModel(dto));
+                    List<MessageResponseDto> content = response.body().getContent();
+                    if (content != null) {
+                        for (MessageResponseDto dto : content) {
+                            messageList.add(mapDtoToModel(dto));
+                        }
+                        // Megfordítjuk, hogy a legújabb legyen alul (index növekszik időrendben)
+                        Collections.reverse(messageList);
                     }
-                    // Backend returns newest first (DESC), reverse to show oldest at top, newest at bottom
-                    Collections.reverse(messageList);
+                    
                     if (messageAdapter == null) setupAdapter();
                     if (messageAdapter != null) {
                         messageAdapter.notifyDataSetChanged();
@@ -218,7 +222,7 @@ public class ChatScreenFragment extends Fragment {
         if (dto.getSenderUsername().equals(currentUsername)) {
             sender.setUserId(currentUserId);
         } else {
-            sender.setUserId("other_user");
+            sender.setUserId("other_user_" + dto.getSenderUsername());
         }
         
         model.setSender(sender);
