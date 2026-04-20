@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -24,7 +26,16 @@ import androidx.navigation.Navigation;
 
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.R;
+import com.example.realtimechatapplication.api.RetrofitClient;
+import com.example.realtimechatapplication.api.dto.AuthResponseDto;
+import com.example.realtimechatapplication.api.dto.UpdateProfileRequestDto;
+import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
+import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ProfileFragment extends Fragment {
 
@@ -34,7 +45,7 @@ public class ProfileFragment extends Fragment {
     private ImageView dropdownArrow, languageDropdownArrow;
     private TextView profileName, currentLanguageText;
     private TextView langOptionEn, langOptionHu;
-    private EditText editUsername, editEmail;
+    private EditText editUsername, editEmail, editPassword;
     private MainViewModel mainViewModel;
     private SwitchMaterial themeSwitch;
     private View colorPickerView;
@@ -61,10 +72,15 @@ public class ProfileFragment extends Fragment {
         setupDetailsToggle();
         setupColorPicker();
         
+        // Először töltsük be az adatokat a szerverről, hogy biztosan frissek legyenek
+        fetchFullProfile();
+
         mainViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
                 profileName.setText(user.getUserName());
                 if (editUsername != null) editUsername.setText(user.getUserName());
+                // Mivel a UserModel-ben nincs email, a ViewModel-ben sem tároltuk eddig külön,
+                // de a fetchFullProfile() után itt is beállíthatnánk, ha bővítjük a modellt.
             }
         });
 
@@ -72,9 +88,43 @@ public class ProfileFragment extends Fragment {
             backButton.setOnClickListener(v -> Navigation.findNavController(view).popBackStack());
         }
         
+        view.findViewById(R.id.btnModify).setOnClickListener(v -> updateProfile());
+
         view.findViewById(R.id.btnLogout).setOnClickListener(v -> {
+            RetrofitClient.setAuthToken(null);
             mainViewModel.setCurrentUser(null);
             Navigation.findNavController(view).navigate(R.id.loginFragment);
+        });
+    }
+
+    private void fetchFullProfile() {
+        mainViewModel.setIsLoading(true);
+        RetrofitClient.getApiService().getCurrentUser().enqueue(new Callback<UserProfileResponseDto>() {
+            @Override
+            public void onResponse(Call<UserProfileResponseDto> call, Response<UserProfileResponseDto> response) {
+                mainViewModel.setIsLoading(false);
+                if (response.isSuccessful() && response.body() != null) {
+                    UserProfileResponseDto dto = response.body();
+                    // Frissítjük a ViewModel-t és a nézeteket
+                    UserModel user = new UserModel(dto.getId().toString(), dto.getUsername(), "");
+                    mainViewModel.setCurrentUser(user);
+                    
+                    // Email betöltése a szerkesztő mezőbe
+                    if (editEmail != null && dto.getEmail() != null) {
+                        editEmail.setText(dto.getEmail());
+                    }
+                    // Jelszó mező ürítése (ne mutasson placeholder-t)
+                    if (editPassword != null) {
+                        editPassword.setText("");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserProfileResponseDto> call, Throwable t) {
+                mainViewModel.setIsLoading(false);
+                Log.e("Profile", "Failed to fetch profile", t);
+            }
         });
     }
 
@@ -86,6 +136,7 @@ public class ProfileFragment extends Fragment {
         profileName = view.findViewById(R.id.profileName);
         editUsername = view.findViewById(R.id.editUsername);
         editEmail = view.findViewById(R.id.editEmail);
+        editPassword = view.findViewById(R.id.editPassword);
         themeSwitch = view.findViewById(R.id.themeSwitch);
         
         languageHeader = view.findViewById(R.id.languageHeader);
@@ -172,6 +223,50 @@ public class ProfileFragment extends Fragment {
                     requireActivity().recreate();
                 })
                 .show();
+        });
+    }
+
+    private void updateProfile() {
+        String newName = editUsername.getText().toString().trim();
+        String newEmail = editEmail != null ? editEmail.getText().toString().trim() : "";
+        String newPass = editPassword != null ? editPassword.getText().toString().trim() : "";
+        
+        if (newName.isEmpty()) {
+            Toast.makeText(getContext(), "A név nem lehet üres!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        mainViewModel.setIsLoading(true);
+        UpdateProfileRequestDto request = new UpdateProfileRequestDto();
+        request.setNewUsername(newName);
+        if (!newEmail.isEmpty()) request.setNewEmail(newEmail);
+        if (!newPass.isEmpty()) request.setNewPassword(newPass);
+
+        RetrofitClient.getApiService().updateProfile(request).enqueue(new Callback<AuthResponseDto>() {
+            @Override
+            public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
+                mainViewModel.setIsLoading(false);
+                if (response.isSuccessful()) {
+                    Toast.makeText(getContext(), "Profil frissítve!", Toast.LENGTH_SHORT).show();
+                    if (response.body() != null && response.body().getToken() != null && !response.body().getToken().isEmpty()) {
+                        RetrofitClient.setAuthToken(response.body().getToken());
+                    }
+                    UserModel user = mainViewModel.getCurrentUser().getValue();
+                    if (user != null) {
+                        user.setUserName(newName);
+                        mainViewModel.setCurrentUser(user);
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Nem sikerült a mentés!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AuthResponseDto> call, Throwable t) {
+                mainViewModel.setIsLoading(false);
+                Log.e("Profile", "Update failed", t);
+                Toast.makeText(getContext(), "Hálózati hiba", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
