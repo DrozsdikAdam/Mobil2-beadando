@@ -20,6 +20,8 @@ import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.api.RetrofitClient;
 import com.example.realtimechatapplication.api.dto.AuthResponseDto;
 import com.example.realtimechatapplication.api.dto.RegisterRequestDto;
+import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
+import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -36,7 +38,6 @@ public class RegistrationFragment extends Fragment {
     private TextInputEditText usernameInput, emailInput, passwordInput;
     private MainViewModel mainViewModel;
 
-    // Backend regex szigorú illesztéssel
     private static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
 
     public RegistrationFragment() {
@@ -96,27 +97,19 @@ public class RegistrationFragment extends Fragment {
         RetrofitClient.getApiService().register(registerRequest).enqueue(new Callback<AuthResponseDto>() {
             @Override
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
-                mainViewModel.setIsLoading(false);
-
                 if (response.isSuccessful() && response.body() != null) {
                     String token = response.body().getToken();
                     RetrofitClient.setAuthToken(token);
-                    Toast.makeText(getContext(), "Sikeres regisztráció!", Toast.LENGTH_SHORT).show();
-
-                    NavOptions navOptions = new NavOptions.Builder()
-                            .setPopUpTo(R.id.loginFragment, true)
-                            .build();
-                    Navigation.findNavController(view).navigate(R.id.chatsFragment, null, navOptions);
+                    
+                    // Most kérjük le a profiladatokat
+                    fetchUserProfile(view);
                 } else {
+                    mainViewModel.setIsLoading(false);
                     String serverMessage = "Regisztráció sikertelen!";
                     try {
                         if (response.errorBody() != null) {
-                            String errorJson = response.errorBody().string();
-                            Log.e("API_ERROR", "Error body: " + errorJson);
-                            JSONObject jsonObject = new JSONObject(errorJson);
-                            if (jsonObject.has("error")) {
-                                serverMessage = jsonObject.getString("error");
-                            }
+                            JSONObject jsonObject = new JSONObject(response.errorBody().string());
+                            if (jsonObject.has("error")) serverMessage = jsonObject.getString("error");
                         }
                     } catch (Exception e) {
                         Log.e("API_ERROR", "Error parsing error body", e);
@@ -128,8 +121,35 @@ public class RegistrationFragment extends Fragment {
             @Override
             public void onFailure(Call<AuthResponseDto> call, Throwable t) {
                 mainViewModel.setIsLoading(false);
-                Log.e("API_FAILURE", t.getMessage(), t);
                 Toast.makeText(getContext(), "Hálózati hiba: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void fetchUserProfile(View view) {
+        RetrofitClient.getApiService().getCurrentUser().enqueue(new Callback<UserProfileResponseDto>() {
+            @Override
+            public void onResponse(Call<UserProfileResponseDto> call, Response<UserProfileResponseDto> response) {
+                mainViewModel.setIsLoading(false);
+                if (response.isSuccessful() && response.body() != null) {
+                    UserProfileResponseDto dto = response.body();
+                    UserModel user = new UserModel(dto.getId().toString(), dto.getUsername(), "");
+                    mainViewModel.setCurrentUser(user);
+
+                    Toast.makeText(getContext(), "Sikeres regisztráció!", Toast.LENGTH_SHORT).show();
+
+                    NavOptions navOptions = new NavOptions.Builder()
+                            .setPopUpTo(R.id.loginFragment, true)
+                            .build();
+                    
+                    Navigation.findNavController(view).navigate(R.id.chatsFragment, null, navOptions);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserProfileResponseDto> call, Throwable t) {
+                mainViewModel.setIsLoading(false);
+                Log.e("Registration", "Failed to fetch profile", t);
             }
         });
     }

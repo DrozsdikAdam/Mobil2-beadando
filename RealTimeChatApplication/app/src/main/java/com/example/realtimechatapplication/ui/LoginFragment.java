@@ -1,6 +1,7 @@
 package com.example.realtimechatapplication.ui;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,8 @@ import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.api.RetrofitClient;
 import com.example.realtimechatapplication.api.dto.AuthResponseDto;
 import com.example.realtimechatapplication.api.dto.LoginRequestDto;
+import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
+import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -77,20 +80,14 @@ public class LoginFragment extends Fragment {
         RetrofitClient.getApiService().login(loginRequest).enqueue(new Callback<AuthResponseDto>() {
             @Override
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
-                mainViewModel.setIsLoading(false);
-                
                 if (response.isSuccessful() && response.body() != null) {
-                    // Token elmentése a RetrofitClient-ben
                     String token = response.body().getToken();
                     RetrofitClient.setAuthToken(token);
-
-                    // Navigáció a ChatsFragment-re, a login törlésével a stack-ről
-                    NavOptions navOptions = new NavOptions.Builder()
-                            .setPopUpTo(R.id.loginFragment, true)
-                            .build();
                     
-                    Navigation.findNavController(view).navigate(R.id.chatsFragment, null, navOptions);
+                    // Token megvan, most kérjük le a profiladatokat
+                    fetchUserProfile(view);
                 } else {
+                    mainViewModel.setIsLoading(false);
                     Toast.makeText(getContext(), "Hibás email vagy jelszó!", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -99,6 +96,32 @@ public class LoginFragment extends Fragment {
             public void onFailure(Call<AuthResponseDto> call, Throwable t) {
                 mainViewModel.setIsLoading(false);
                 Toast.makeText(getContext(), "Hálózati hiba: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void fetchUserProfile(View view) {
+        RetrofitClient.getApiService().getCurrentUser().enqueue(new Callback<UserProfileResponseDto>() {
+            @Override
+            public void onResponse(Call<UserProfileResponseDto> call, Response<UserProfileResponseDto> response) {
+                mainViewModel.setIsLoading(false);
+                if (response.isSuccessful() && response.body() != null) {
+                    UserProfileResponseDto dto = response.body();
+                    UserModel user = new UserModel(dto.getId().toString(), dto.getUsername(), "");
+                    mainViewModel.setCurrentUser(user);
+
+                    NavOptions navOptions = new NavOptions.Builder()
+                            .setPopUpTo(R.id.loginFragment, true)
+                            .build();
+                    
+                    Navigation.findNavController(view).navigate(R.id.chatsFragment, null, navOptions);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserProfileResponseDto> call, Throwable t) {
+                mainViewModel.setIsLoading(false);
+                Log.e("Login", "Failed to fetch profile", t);
             }
         });
     }
