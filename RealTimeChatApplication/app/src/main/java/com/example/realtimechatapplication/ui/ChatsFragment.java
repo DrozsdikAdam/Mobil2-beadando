@@ -1,6 +1,12 @@
 package com.example.realtimechatapplication.ui;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -12,21 +18,30 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.adapters.ChatAdapter;
 import com.example.realtimechatapplication.R;
+import com.example.realtimechatapplication.api.RetrofitClient;
+import com.example.realtimechatapplication.api.dto.ChatRoomDto;
 import com.example.realtimechatapplication.models.ChatModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ChatsFragment extends Fragment {
 
+    private static final String TAG = "ChatsFragment";
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
     private List<ChatModel> chatList;
@@ -42,11 +57,14 @@ public class ChatsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // ViewModel inicializálása
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        mainViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
-        });
+        // UI elemek inicializálása
+        recyclerView = view.findViewById(R.id.chatList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        chatList = new ArrayList<>();
+        chatAdapter = new ChatAdapter(chatList);
+        recyclerView.setAdapter(chatAdapter);
 
         // Navigáció beállítása
         Toolbar toolbar = view.findViewById(R.id.toolbar);
@@ -69,20 +87,49 @@ public class ChatsFragment extends Fragment {
             return NavigationUI.onNavDestinationSelected(item, navController);
         });
 
-        // RecyclerView inicializálása
-        recyclerView = view.findViewById(R.id.chatList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        // Beszélgetések betöltése a szerverről
+        loadUserChats();
+    }
 
-        // Adatlista feltöltése
-        chatList = new ArrayList<>();
-        chatList.add(new ChatModel(getString(R.string.user_name_1), getString(R.string.message_1), getString(R.string.time_1), R.drawable.ic_person));
-        chatList.add(new ChatModel(getString(R.string.user_name_2), getString(R.string.message_2), getString(R.string.time_2), R.drawable.ic_person));
-        chatList.add(new ChatModel(getString(R.string.user_name_3), getString(R.string.message_3), getString(R.string.time_3), R.drawable.ic_person));
-        chatList.add(new ChatModel(getString(R.string.user_name_4), getString(R.string.message_4), getString(R.string.time_yesterday), R.drawable.ic_person));
-        chatList.add(new ChatModel(getString(R.string.user_name_5), getString(R.string.message_5), getString(R.string.time_yesterday), R.drawable.ic_person));
+    private void loadUserChats() {
+        mainViewModel.setIsLoading(true);
+        RetrofitClient.getApiService().getUserRooms().enqueue(new Callback<List<ChatRoomDto>>() {
+            @Override
+            public void onResponse(Call<List<ChatRoomDto>> call, Response<List<ChatRoomDto>> response) {
+                mainViewModel.setIsLoading(false);
+                if (response.isSuccessful() && response.body() != null) {
+                    chatList.clear();
+                    for (ChatRoomDto dto : response.body()) {
+                        String lastMsg = "";
+                        String timeStamp = "";
+                        if (dto.getLastMessage() != null) {
+                            lastMsg = dto.getLastMessage().getContent();
+                            if (dto.getLastMessage().getTimestamp() != null) {
+                                timeStamp = formatTimestamp(dto.getLastMessage().getTimestamp());
+                            }
+                        }
+                        chatList.add(new ChatModel(
+                                dto.getId(),
+                                dto.getName(),
+                                lastMsg,
+                                timeStamp,
+                                R.drawable.ic_person
+                        ));
+                    }
+                    chatAdapter.notifyDataSetChanged();
+                } else {
+                    Log.e(TAG, "Failed to load chats: " + response.code());
+                    Toast.makeText(getContext(), "Nem sikerült betölteni a beszélgetéseket", Toast.LENGTH_SHORT).show();
+                }
+            }
 
-        chatAdapter = new ChatAdapter(chatList);
-        recyclerView.setAdapter(chatAdapter);
+            @Override
+            public void onFailure(Call<List<ChatRoomDto>> call, Throwable t) {
+                mainViewModel.setIsLoading(false);
+                Log.e(TAG, "Network error", t);
+                Toast.makeText(getContext(), "Hálózati hiba a beszélgetések betöltésekor", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void showAddOptionsDialog() {
@@ -102,5 +149,20 @@ public class ChatsFragment extends Fragment {
 
         dialog.setContentView(view);
         dialog.show();
+    }
+
+    private String formatTimestamp(String isoTimestamp) {
+        try {
+            // Backend sends ISO format like "2026-04-20T20:30:00"
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+            Date date = isoFormat.parse(isoTimestamp);
+            if (date != null) {
+                SimpleDateFormat displayFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                return displayFormat.format(date);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse timestamp: " + isoTimestamp, e);
+        }
+        return isoTimestamp;
     }
 }
