@@ -37,6 +37,9 @@ public interface ApiService {
     @GET("/api/users/recommended")
     Call<List<UserProfileResponseDto>> getRecommendedUsers();
 
+    @GET("/api/users/all")
+    Call<List<UserProfileResponseDto>> getAllUsers();
+
     @GET("/api/users/me")
     Call<UserProfileResponseDto> getCurrentUser();
 
