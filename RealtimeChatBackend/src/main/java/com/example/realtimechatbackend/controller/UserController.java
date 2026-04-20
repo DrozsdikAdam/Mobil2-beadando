@@ -1,6 +1,7 @@
 package com.example.realtimechatbackend.controller;
 
 import com.example.realtimechatbackend.dto.AuthResponseDto;
+import com.example.realtimechatbackend.dto.CurrentUserProfileResponseDto;
 import com.example.realtimechatbackend.dto.UpdateEmailRequestDto;
 import com.example.realtimechatbackend.dto.UpdatePasswordRequestDto;
 import com.example.realtimechatbackend.dto.UpdateProfileRequestDto;
@@ -27,8 +28,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/search")
-    public ResponseEntity<List<UserProfileResponseDto>> searchUsers(@RequestParam String query){
-        return    ResponseEntity.ok(userService.searchUsers(query));
+    public ResponseEntity<List<UserProfileResponseDto>> searchUsers(@RequestParam String query, Principal principal){
+        return    ResponseEntity.ok(userService.searchUsers(query, principal.getName()));
     }
 
     @GetMapping("/recommended")
@@ -36,8 +37,13 @@ public class UserController {
         return ResponseEntity.ok(userService.getRecommendedUsers(principal.getName()));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<UserProfileResponseDto>> getAllUsers(Principal principal){
+        return ResponseEntity.ok(userService.getAllUsers(principal.getName()));
+    }
+
     @GetMapping("/me")
-    public ResponseEntity<UserProfileResponseDto> getCurrentUser(Principal principal) {
+    public ResponseEntity<CurrentUserProfileResponseDto> getCurrentUser(Principal principal) {
         return ResponseEntity.ok(userService.getCurrentUser(principal.getName()));
     }
 
@@ -46,21 +52,18 @@ public class UserController {
         String currentUsername = principal.getName();
         AuthResponseDto response = null;
 
-        // 1. Jelszó frissítése (ha küldött be újat)
         if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
             UpdatePasswordRequestDto passwordRequest = new UpdatePasswordRequestDto();
             passwordRequest.setNewPassword(request.getNewPassword());
             userService.updatePassword(passwordRequest, currentUsername);
         }
 
-        // 2. Email frissítése (ha küldött be újat)
         if (request.getNewEmail() != null && !request.getNewEmail().isBlank()) {
             UpdateEmailRequestDto emailRequest = new UpdateEmailRequestDto();
             emailRequest.setNewEmail(request.getNewEmail());
             userService.updateEmail(emailRequest, currentUsername);
         }
 
-        // 3. Felhasználónév frissítése (ha küldött be újat)
         if (request.getNewUsername() != null && !request.getNewUsername().isBlank() && !request.getNewUsername().equals(currentUsername)) {
             UpdateUsernameRequestDto usernameRequest = new UpdateUsernameRequestDto();
             usernameRequest.setNewUsername(request.getNewUsername());

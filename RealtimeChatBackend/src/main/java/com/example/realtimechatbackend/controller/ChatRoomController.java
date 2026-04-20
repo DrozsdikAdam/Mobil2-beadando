@@ -1,8 +1,8 @@
 package com.example.realtimechatbackend.controller;
 
+import com.example.realtimechatbackend.dto.ChatRoomResponseDto;
 import com.example.realtimechatbackend.dto.CreateRoomRequestDto;
 import com.example.realtimechatbackend.dto.CreateRoomResponseDto;
-import com.example.realtimechatbackend.model.ChatRoom;
 import com.example.realtimechatbackend.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ public class ChatRoomController {
     }
 
     @GetMapping
-    public ResponseEntity<Set<ChatRoom>> getUserRooms(Principal principal) {
+    public ResponseEntity<Set<ChatRoomResponseDto>> getUserRooms(Principal principal) {
         return ResponseEntity.ok(chatRoomService.getUserRooms(principal.getName()));
     }
 }

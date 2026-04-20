@@ -1,0 +1,63 @@
+<resources>
+    <string name="app_name">RealTimeChatApplication</string>
+    <string name="toolbar_title">Realtime chat app</string>
+    <string name="test_name">Test Name</string>
+    <string name="test_last_message">Very interesting message for the user</string>
+    <string name="test_timestamp">14:20</string>
+    <string name="user_name_1">Teszt Elek</string>
+    <string name="message_1">Szia! Mi újság?</string>
+    <string name="time_1">12:00</string>
+    <string name="user_name_2">Kovács Anna</string>
+    <string name="message_2">Mikor találkozunk?</string>
+    <string name="time_2">11:45</string>
+    <string name="user_name_3">Nagy Gábor</string>
+    <string name="message_3">Elküldtem a fájlt.</string>
+    <string name="time_3">09:30</string>
+    <string name="user_name_4">Szabó Bence</string>
+    <string name="message_4">Köszi a segítséget!</string>
+    <string name="time_yesterday">Tegnap</string>
+    <string name="user_name_5">Horváth Dóra</string>
+    <string name="message_5">Szia, mizu?</string>
+    <string name="menu_search">Keresés</string>
+    <string name="menu_chats">Chatek</string>
+    <string name="menu_add">Hozzáadás</string>
+    <string name="menu_profile">Profil</string>
+    <string name="go_back_arrow">Vissza</string>
+    <string name="csoport_l_trehoz_sa">Csoport létrehozása</string>
+    <string name="csoport_neve">Csoport neve</string>
+    <string name="csoport_l_trehoz_s">Csoport Létrehozás</string>
+    <string name="tagok_hozz_ad_sa">Tagok hozzáadása</string>
+    <string name="friend_name">Ismerős neve</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="login_title">Bejelentkezés</string>
+    <string name="email_hint">Email cím</string>
+    <string name="password_hint">Jelszó</string>
+    <string name="login_button">Bejelentkezés</string>
+    <string name="registration_text">Nincs fiókja? Regisztráció</string>
+    <string name="registration_title">Regisztráció</string>
+    <string name="username_hint">Felhasználónév</string>
+    <string name="register_button">Regisztráció</string>
+    <string name="back_to_login_text">Van már fiókja? Bejelentkezés</string>
+
+    <string name="username">Felhasználónév</string>
+    <string name="profile_status">Online</string>
+    <string name="profile_details">Profil adatok</string>
+    <string name="password_placeholder">********</string>
+    <string name="modify">Módosítás</string>
+    <string name="change_profile_image">Profilkép módosítása</string>
+    <string name="general_settings">Általános beállítások</string>
+    <string name="dark_mode">Sötét mód</string>
+    <string name="language">Nyelv</string>
+    <string name="lang_en">English</string>
+    <string name="lang_hu">Magyar</string>
+    <string name="ui_color_setting">UI Színbeállítás</string>
+    <string name="logout">Kijelentkezés</string>
+
+    <string name="add_contact_title">Ismerős hozzáadása</string>
+    <string name="search_hint">Név vagy email keresése</string>
+    <string name="add_friend">Hozzáadás</string>
+    <string name="suggested_friends">Javasolt ismerősök</string>
+
+    <string name="choose_color">Válassz színt</string>
+</resources>

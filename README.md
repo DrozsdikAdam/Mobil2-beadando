@@ -63,3 +63,17 @@ Az alkalmazás rétegelt architektúrát használ. A kliens és a szerver közö
 Az adatok mentése minden esetben duplikált: a szerveroldali központi PostgreSQL mellett az Android kliensen is tárolódnak (Room), így a felhasználói élmény folyamatos marad gyenge hálózati kapcsolat esetén is.
 
 ---
+
+## Képernyők és Feladatkiosztás
+
+### Ádám
+- [x] főoldal
+- [x] chat oldal
+- [x] csoport létrehozás
+
+### Richárd
+- [ ] profil
+- [ ] bejelentkezés
+- [ ] regisztráció
+- [ ] ember Bejelölés
+

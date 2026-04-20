@@ -1,6 +1,7 @@
 package com.example.realtimechatbackend.service;
 
 import com.example.realtimechatbackend.dto.AuthResponseDto;
+import com.example.realtimechatbackend.dto.CurrentUserProfileResponseDto;
 import com.example.realtimechatbackend.dto.UpdateEmailRequestDto;
 import com.example.realtimechatbackend.dto.UpdatePasswordRequestDto;
 import com.example.realtimechatbackend.dto.UpdateUsernameRequestDto;
@@ -25,9 +26,9 @@ public class UserService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
-    public List<UserProfileResponseDto> searchUsers(String query){
+    public List<UserProfileResponseDto> searchUsers(String query, String currentUsername){
 
-        List<User> users = userRepository.findByUsernameContainingIgnoreCaseAndIsDeletedFalse(query);
+        List<User> users = userRepository.searchUsersExcludingPrivateContacts(query, currentUsername);
 
         return users.stream().map(user -> UserProfileResponseDto.builder()
                 .id(user.getId())
@@ -45,13 +46,24 @@ public class UserService {
                 .build()).toList();
     }
 
-    public UserProfileResponseDto getCurrentUser(String username){
+    public List<UserProfileResponseDto> getAllUsers(String currentUsername){
+        return userRepository.findByUsernameNotAndIsDeletedFalse(currentUsername)
+                .stream().map(user -> UserProfileResponseDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .isOnline(user.getIsOnline())
+                .build()).toList();
+    }
+
+    public CurrentUserProfileResponseDto getCurrentUser(String username){
         User user = userRepository.findByUsernameAndIsDeletedFalse(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         
-        return UserProfileResponseDto.builder()
+        return CurrentUserProfileResponseDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .email(user.getEmail())
+                .password(user.getPassword())
                 .isOnline(user.getIsOnline()).build();
     }
 

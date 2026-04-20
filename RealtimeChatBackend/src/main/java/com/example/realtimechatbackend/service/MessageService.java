@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -27,6 +28,7 @@ public class MessageService {
     private final UserRepository userRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
+    @Transactional
     public MessageResponseDto sendMessage(SendMessageRequestDto request, String username) {
 
         Optional<User> currentUser = userRepository.findByUsernameAndIsDeletedFalse(username);
@@ -61,6 +63,7 @@ public class MessageService {
         return messageResponseDto;
     }
 
+    @Transactional(readOnly = true)
     public Page<MessageResponseDto> getRoomMessages(UUID chatRoomId, String username, Pageable pageAble) {
 
         Optional<User> user = userRepository.findByUsernameAndIsDeletedFalse(username);

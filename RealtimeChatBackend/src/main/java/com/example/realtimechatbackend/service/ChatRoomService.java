@@ -1,7 +1,9 @@
 package com.example.realtimechatbackend.service;
 
+import com.example.realtimechatbackend.dto.ChatRoomResponseDto;
 import com.example.realtimechatbackend.dto.CreateRoomRequestDto;
 import com.example.realtimechatbackend.dto.CreateRoomResponseDto;
+import com.example.realtimechatbackend.dto.MessageResponseDto;
 import com.example.realtimechatbackend.exception.InvalidGroupException;
 import com.example.realtimechatbackend.exception.UserNotFoundException;
 import com.example.realtimechatbackend.model.ChatRoom;
@@ -10,6 +12,7 @@ import com.example.realtimechatbackend.repository.ChatRoomRepository;
 import com.example.realtimechatbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public CreateRoomResponseDto createRoom(CreateRoomRequestDto request, String username) {
         Optional<User> currentUser = userRepository.findByUsernameAndIsDeletedFalse(username);
         if (currentUser.isEmpty()) throw new UserNotFoundException("User not found");
@@ -63,7 +68,6 @@ public class ChatRoomService {
 
         }
 
-        // create private chatroom
         Optional<User> otherProfile = userRepository.findById(request.getUserIds().getFirst());
         if (otherProfile.isEmpty()) throw new UserNotFoundException("User with id " + request.getUserIds().getFirst() + " not found");
         
@@ -95,10 +99,31 @@ public class ChatRoomService {
                 .build();
     }
 
-    public Set<ChatRoom> getUserRooms(String username) {
+    @Transactional(readOnly = true)
+    public Set<ChatRoomResponseDto> getUserRooms(String username) {
         Optional<User> currentUser = userRepository.findByUsernameAndIsDeletedFalse(username);
         if (currentUser.isEmpty()) throw new UserNotFoundException("User not found");
 
-        return chatRoomRepository.findByUsersContaining(currentUser.get());
+        Set<ChatRoom> chatRooms = chatRoomRepository.findByUsersContaining(currentUser.get());
+        
+        return chatRooms.stream().map(room -> {
+            MessageResponseDto lastMsgDto = null;
+            if (room.getLastMessage() != null) {
+                lastMsgDto = MessageResponseDto.builder()
+                        .id(room.getLastMessage().getId())
+                        .content(room.getLastMessage().getContent())
+                        .senderUsername(room.getLastMessage().getSender().getUsername())
+                        .chatRoomId(room.getId())
+                        .timestamp(room.getLastMessage().getTimestamp())
+                        .build();
+            }
+            
+            return ChatRoomResponseDto.builder()
+                    .id(room.getId())
+                    .name(room.getName())
+                    .isGroup(room.getIsGroup())
+                    .lastMessage(lastMsgDto)
+                    .build();
+        }).collect(Collectors.toSet());
     }
 }

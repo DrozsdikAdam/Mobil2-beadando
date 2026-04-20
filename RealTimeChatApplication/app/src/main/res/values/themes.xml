@@ -1,9 +1,38 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.RealTimeChatApplication" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="uiColor">@color/ui_blue</item>
     </style>
 
     <style name="Theme.RealTimeChatApplication" parent="Base.Theme.RealTimeChatApplication" />
+
+    <!-- Szín témák -->
+    <style name="Theme.RealTimeChatApplication.Blue" parent="Theme.RealTimeChatApplication">
+        <item name="uiColor">@color/ui_blue</item>
+    </style>
+    <style name="Theme.RealTimeChatApplication.Red" parent="Theme.RealTimeChatApplication">
+        <item name="uiColor">@color/ui_red</item>
+    </style>
+    <style name="Theme.RealTimeChatApplication.Green" parent="Theme.RealTimeChatApplication">
+        <item name="uiColor">@color/ui_green</item>
+    </style>
+    <style name="Theme.RealTimeChatApplication.Orange" parent="Theme.RealTimeChatApplication">
+        <item name="uiColor">@color/ui_orange</item>
+    </style>
+    <style name="Theme.RealTimeChatApplication.Purple" parent="Theme.RealTimeChatApplication">
+        <item name="uiColor">@color/ui_purple</item>
+    </style>
+    <style name="Theme.RealTimeChatApplication.Teal" parent="Theme.RealTimeChatApplication">
+        <item name="uiColor">@color/ui_teal</item>
+    </style>
+    <style name="Theme.RealTimeChatApplication.Pink" parent="Theme.RealTimeChatApplication">
+        <item name="uiColor">@color/ui_pink</item>
+    </style>
+    <style name="Theme.RealTimeChatApplication.Indigo" parent="Theme.RealTimeChatApplication">
+        <item name="uiColor">@color/ui_indigo</item>
+    </style>
+
+    <style name="CircleImage">
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>
