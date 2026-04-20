@@ -40,7 +40,6 @@
     <string name="register_button">Regisztráció</string>
     <string name="back_to_login_text">Van már fiókja? Bejelentkezés</string>
 
-    <!-- Profile strings -->
     <string name="username">Felhasználónév</string>
     <string name="profile_status">Online</string>
     <string name="profile_details">Profil adatok</string>
@@ -55,12 +54,8 @@
     <string name="ui_color_setting">UI Színbeállítás</string>
     <string name="logout">Kijelentkezés</string>
 
-    <!-- Add Contact strings -->
     <string name="add_contact_title">Ismerős hozzáadása</string>
     <string name="search_hint">Név vagy email keresése</string>
     <string name="add_friend">Hozzáadás</string>
     <string name="suggested_friends">Javasolt ismerősök</string>
-
-    <!-- Chat strings -->
-    <string name="write_message_hint">Üzenet írása...</string>
 </resources>

@@ -1,0 +1,63 @@
+<resources>
+    <string name="app_name">RealTimeChatApplication</string>
+    <string name="toolbar_title">Realtime chat app</string>
+    <string name="test_name">Test Name</string>
+    <string name="test_last_message">Very interesting message for the user</string>
+    <string name="test_timestamp">14:20</string>
+    <string name="user_name_1">Teszt Elek</string>
+    <string name="message_1">Szia! Mi újság?</string>
+    <string name="time_1">12:00</string>
+    <string name="user_name_2">Kovács Anna</string>
+    <string name="message_2">Mikor találkozunk?</string>
+    <string name="time_2">11:45</string>
+    <string name="user_name_3">Nagy Gábor</string>
+    <string name="message_3">Elküldtem a fájlt.</string>
+    <string name="time_3">09:30</string>
+    <string name="user_name_4">Szabó Bence</string>
+    <string name="message_4">Köszi a segítséget!</string>
+    <string name="time_yesterday">Tegnap</string>
+    <string name="user_name_5">Horváth Dóra</string>
+    <string name="message_5">Szia, mizu?</string>
+    <string name="menu_search">Search</string>
+    <string name="menu_chats">Chats</string>
+    <string name="menu_add">Add</string>
+    <string name="menu_profile">Profile</string>
+    <string name="go_back_arrow">Back</string>
+    <string name="csoport_l_trehoz_sa">Create Group</string>
+    <string name="csoport_neve">Group Name</string>
+    <string name="csoport_l_trehoz_s">Create Group</string>
+    <string name="tagok_hozz_ad_sa">Add Members</string>
+    <string name="friend_name">Friend name</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="login_title">Login</string>
+    <string name="email_hint">Email address</string>
+    <string name="password_hint">Password</string>
+    <string name="login_button">Login</string>
+    <string name="registration_text">Don\'t have an account? Register</string>
+    <string name="registration_title">Registration</string>
+    <string name="username_hint">Username</string>
+    <string name="register_button">Register</string>
+    <string name="back_to_login_text">Already have an account? Login</string>
+
+    <string name="username">Username</string>
+    <string name="profile_status">Online</string>
+    <string name="profile_details">Profile details</string>
+    <string name="password_placeholder">********</string>
+    <string name="modify">Modify</string>
+    <string name="change_profile_image">Modify profile picture</string>
+    <string name="general_settings">General settings</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="language">Language</string>
+    <string name="lang_en">English</string>
+    <string name="lang_hu">Hungarian</string>
+    <string name="ui_color_setting">UI Color Settings</string>
+    <string name="logout">Logout</string>
+
+    <string name="add_contact_title">Add friend</string>
+    <string name="search_hint">Search for name or email</string>
+    <string name="add_friend">Add</string>
+    <string name="suggested_friends">Suggested friends</string>
+
+    <string name="write_message_hint">Type a message...</string>
+</resources>
