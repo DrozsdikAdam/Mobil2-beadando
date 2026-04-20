@@ -47,15 +47,14 @@ public class ChatScreenFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Nézetek inicializálása
         recyclerViewMessages = view.findViewById(R.id.recyclerViewMessages);
-        etMessage = view.findViewById(R.id.etMessage);
+        etMessage = view.findViewById(R.id.editTextMessage);
         btnSend = view.findViewById(R.id.btnSend);
-        btnBack = view.findViewById(R.id.btnBack);
-        tvChatName = view.findViewById(R.id.tvChatName);
-        imgChatProfile = view.findViewById(R.id.imgChatProfile);
+        btnBack = view.findViewById(R.id.backButton);
+        tvChatName = view.findViewById(R.id.chatPartnerName);
+        imgChatProfile = view.findViewById(R.id.chatPartnerImage);
 
-        // Lista és Adapter beállítása
+        //lista és Adapter beállítása
         messageList = new ArrayList<>();
         messageAdapter = new MessageAdapter(messageList, currentUserId);
         
@@ -64,24 +63,24 @@ public class ChatScreenFragment extends Fragment {
         recyclerViewMessages.setLayoutManager(layoutManager);
         recyclerViewMessages.setAdapter(messageAdapter);
 
-        // Vissza gomb bekötése
+        //Vissza gomb bekötése
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> {
-                if (getActivity() != null) {
-                    getActivity().onBackPressed();
-                }
+                requireActivity().getOnBackPressedDispatcher().onBackPressed();
             });
         }
 
-        // Küldés gomb
-        btnSend.setOnClickListener(v -> {
-            String text = etMessage.getText().toString().trim();
-            if (!text.isEmpty()) {
-                sendMessage(text);
-            }
-        });
+        //Küldés gomb
+        if (btnSend != null) {
+            btnSend.setOnClickListener(v -> {
+                String text = etMessage.getText().toString().trim();
+                if (!text.isEmpty()) {
+                    sendMessage(text);
+                }
+            });
+        }
         
-        // Teszt adatok hozzáadása a megjelenítéshez
+        //Teszt adatok
         addTestMessages();
     }
 
@@ -90,8 +89,7 @@ public class ChatScreenFragment extends Fragment {
         newMessage.setContent(text);
         newMessage.setTimeStamp(System.currentTimeMillis());
         newMessage.setIsDeleted(false);
-        
-        // Küldő beállítása (saját magunk)
+
         UserModel currentUser = new UserModel(currentUserId, "Én", "");
         newMessage.setSender(currentUser);
         

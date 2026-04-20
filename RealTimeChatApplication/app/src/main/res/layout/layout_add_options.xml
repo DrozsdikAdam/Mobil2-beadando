@@ -29,7 +29,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_person"
-            app:tint="@color/TextBlue" />
+            app:tint="?attr/uiColor" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -55,7 +55,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_chat"
-            app:tint="@color/TextBlue" />
+            app:tint="?attr/uiColor" />
 
         <TextView
             android:layout_width="wrap_content"
