@@ -1,8 +1,15 @@
 package com.example.realtimechatapplication.api.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 public class RegisterRequestDto {
+    @SerializedName("username")
     private String username;
+    
+    @SerializedName("email")
     private String email;
+    
+    @SerializedName("password")
     private String password;
 
     public RegisterRequestDto() {}
