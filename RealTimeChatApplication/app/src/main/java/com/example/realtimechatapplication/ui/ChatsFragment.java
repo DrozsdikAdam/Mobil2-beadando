@@ -59,14 +59,12 @@ public class ChatsFragment extends Fragment {
 
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        // UI elemek inicializálása
         recyclerView = view.findViewById(R.id.chatList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         chatList = new ArrayList<>();
         chatAdapter = new ChatAdapter(chatList);
         recyclerView.setAdapter(chatAdapter);
 
-        // Navigáció beállítása
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         NavController navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
@@ -87,7 +85,6 @@ public class ChatsFragment extends Fragment {
             return NavigationUI.onNavDestinationSelected(item, navController);
         });
 
-        // Beszélgetések betöltése a szerverről
         loadUserChats();
     }
 

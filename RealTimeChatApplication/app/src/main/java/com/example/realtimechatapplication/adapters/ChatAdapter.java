@@ -39,14 +39,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         holder.profileImage.setImageResource(chat.getProfileImage());
 
         holder.itemView.setOnClickListener(v -> {
-            // Elmentjük a kiválasztott chat adatait a ViewModel-be
             AppCompatActivity activity = (AppCompatActivity) v.getContext();
             MainViewModel mainViewModel = new ViewModelProvider(activity).get(MainViewModel.class);
             
             mainViewModel.setSelectedChatId(chat.getId().toString());
             mainViewModel.setSelectedChatPartnerName(chat.getName());
 
-            // Navigáció a ChatScreenFragment-re
             Navigation.findNavController(v).navigate(R.id.chatScreenFragment);
         });
     }

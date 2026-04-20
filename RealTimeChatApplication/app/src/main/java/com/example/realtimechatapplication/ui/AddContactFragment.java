@@ -47,7 +47,6 @@ public class AddContactFragment extends Fragment {
     private MainViewModel mainViewModel;
 
     public AddContactFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -76,7 +75,6 @@ public class AddContactFragment extends Fragment {
         recyclerViewContacts.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewContacts.setAdapter(adapter);
 
-        // Keresés figyelése
         searchContact.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -96,7 +94,6 @@ public class AddContactFragment extends Fragment {
             createChatWithSelected();
         });
 
-        // Alapértelmezett (ajánlott) felhasználók betöltése
         loadRecommendedUsers();
     }
 

@@ -72,7 +72,6 @@ public class CreateGroupFragment extends Fragment {
 
         btnCreateGroup.setOnClickListener(v -> createGroup());
 
-        // Valódi felhasználók betöltése a szerverről
         loadAvailableUsers();
     }
 

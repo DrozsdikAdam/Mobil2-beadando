@@ -81,7 +81,6 @@ public class ChatScreenFragment extends Fragment {
         layoutManager.setStackFromEnd(true);
         recyclerViewMessages.setLayoutManager(layoutManager);
 
-        // Saját adatok lekérése
         mainViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
                 currentUserId = user.getUserId();
@@ -90,7 +89,6 @@ public class ChatScreenFragment extends Fragment {
             }
         });
 
-        // Kiválasztott chat megfigyelése
         mainViewModel.getSelectedChatId().observe(getViewLifecycleOwner(), chatId -> {
             if (chatId != null) {
                 currentChatRoomId = UUID.fromString(chatId);

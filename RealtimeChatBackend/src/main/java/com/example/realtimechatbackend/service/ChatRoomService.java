@@ -68,7 +68,6 @@ public class ChatRoomService {
 
         }
 
-        // create private chatroom
         Optional<User> otherProfile = userRepository.findById(request.getUserIds().getFirst());
         if (otherProfile.isEmpty()) throw new UserNotFoundException("User with id " + request.getUserIds().getFirst() + " not found");
         
@@ -119,8 +118,6 @@ public class ChatRoomService {
                         .build();
             }
             
-            // Ha privát szoba és nincs külön neve, adhatunk neki a másik fél nevét, 
-            // de azt most egyszerűbb lenne a kliensnek lekezelni, így csak DTO-ba rakjuk.
             return ChatRoomResponseDto.builder()
                     .id(room.getId())
                     .name(room.getName())

@@ -52,21 +52,18 @@ public class UserController {
         String currentUsername = principal.getName();
         AuthResponseDto response = null;
 
-        // 1. Jelszó frissítése (ha küldött be újat)
         if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
             UpdatePasswordRequestDto passwordRequest = new UpdatePasswordRequestDto();
             passwordRequest.setNewPassword(request.getNewPassword());
             userService.updatePassword(passwordRequest, currentUsername);
         }
 
-        // 2. Email frissítése (ha küldött be újat)
         if (request.getNewEmail() != null && !request.getNewEmail().isBlank()) {
             UpdateEmailRequestDto emailRequest = new UpdateEmailRequestDto();
             emailRequest.setNewEmail(request.getNewEmail());
             userService.updateEmail(emailRequest, currentUsername);
         }
 
-        // 3. Felhasználónév frissítése (ha küldött be újat)
         if (request.getNewUsername() != null && !request.getNewUsername().isBlank() && !request.getNewUsername().equals(currentUsername)) {
             UpdateUsernameRequestDto usernameRequest = new UpdateUsernameRequestDto();
             usernameRequest.setNewUsername(request.getNewUsername());

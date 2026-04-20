@@ -51,7 +51,6 @@ public class ProfileFragment extends Fragment {
     private View colorPickerView;
 
     public ProfileFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -105,15 +104,12 @@ public class ProfileFragment extends Fragment {
                 mainViewModel.setIsLoading(false);
                 if (response.isSuccessful() && response.body() != null) {
                     UserProfileResponseDto dto = response.body();
-                    // Frissítjük a ViewModel-t és a nézeteket
                     UserModel user = new UserModel(dto.getId().toString(), dto.getUsername(), "");
                     mainViewModel.setCurrentUser(user);
                     
-                    // Email betöltése a szerkesztő mezőbe
                     if (editEmail != null && dto.getEmail() != null) {
                         editEmail.setText(dto.getEmail());
                     }
-                    // Jelszó mező ürítése (ne mutasson placeholder-t)
                     if (editPassword != null) {
                         editPassword.setText("");
                     }

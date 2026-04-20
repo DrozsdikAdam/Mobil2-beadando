@@ -35,7 +35,6 @@ public class LoginFragment extends Fragment {
     private MainViewModel mainViewModel;
 
     public LoginFragment() {
-        // Required empty public constructor
     }
 
     @Override

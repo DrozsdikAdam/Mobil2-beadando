@@ -41,7 +41,6 @@ public class RegistrationFragment extends Fragment {
     private static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
 
     public RegistrationFragment() {
-        // Required empty public constructor
     }
 
     @Override

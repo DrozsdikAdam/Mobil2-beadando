@@ -18,7 +18,6 @@ public class MainViewModel extends ViewModel {
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
-    // Getters
     public LiveData<UserModel> getCurrentUser() {
         return currentUser;
     }
@@ -43,7 +42,6 @@ public class MainViewModel extends ViewModel {
         return errorMessage;
     }
 
-    // Setters
     public void setCurrentUser(UserModel user) {
         this.currentUser.setValue(user);
     }

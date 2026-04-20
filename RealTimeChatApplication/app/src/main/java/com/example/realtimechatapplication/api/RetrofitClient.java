@@ -12,7 +12,6 @@ public class RetrofitClient {
     private static Retrofit retrofit = null;
     private static String authToken = null;
 
-    // Metódus a token beállításához (bejelentkezés után)
     public static void setAuthToken(String token) {
         authToken = token;
         // Ha változik a token, újra kell építeni a Retrofitet, hogy az új klienst használja
@@ -31,12 +30,10 @@ public class RetrofitClient {
             OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
                     .addInterceptor(loggingInterceptor);
 
-            // Token Interceptor hozzáadása
             clientBuilder.addInterceptor(chain -> {
                 Request original = chain.request();
                 Request.Builder requestBuilder = original.newBuilder();
 
-                // Ha van elmentett tokenünk, hozzáadjuk a fejléchez
                 if (authToken != null && !authToken.isEmpty()) {
                     requestBuilder.header("Authorization", "Bearer " + authToken);
                 }
