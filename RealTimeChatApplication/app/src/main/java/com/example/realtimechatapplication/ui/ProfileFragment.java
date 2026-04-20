@@ -1,5 +1,7 @@
 package com.example.realtimechatapplication.ui;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -18,6 +21,7 @@ import androidx.navigation.Navigation;
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.models.UserModel;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class ProfileFragment extends Fragment {
 
@@ -28,6 +32,7 @@ public class ProfileFragment extends Fragment {
     private TextView profileName;
     private EditText editUsername, editEmail;
     private MainViewModel mainViewModel;
+    private SwitchMaterial themeSwitch;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -54,6 +59,24 @@ public class ProfileFragment extends Fragment {
         profileName = view.findViewById(R.id.profileName);
         editUsername = view.findViewById(R.id.editUsername);
         editEmail = view.findViewById(R.id.editEmail);
+        themeSwitch = view.findViewById(R.id.themeSwitch);
+
+        // Téma választó beállítása
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("Settings", Context.MODE_PRIVATE);
+        boolean isDarkMode = sharedPreferences.getBoolean("DarkMode", false);
+        themeSwitch.setChecked(isDarkMode);
+
+        themeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("DarkMode", isChecked);
+            editor.apply();
+
+            if (isChecked) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            }
+        });
 
         // Adatok megfigyelése a ViewModel-ből
         mainViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
