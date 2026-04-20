@@ -44,6 +44,7 @@ public class MessageService {
         message.setContent(request.getContent());
         message.setSender(currentUser.get());
         message.setTimestamp(LocalDateTime.now());
+        message.setIsDeleted(false);
 
         Message savedMessage = messageRepository.save(message);
 
@@ -58,7 +59,7 @@ public class MessageService {
                 .timestamp(savedMessage.getTimestamp())
                 .build();
 
-        simpMessagingTemplate.convertAndSend("/group/" + request.getChatRoomId(), messageResponseDto);
+        simpMessagingTemplate.convertAndSend("/topic/rooms/" + request.getChatRoomId(), messageResponseDto);
 
         return messageResponseDto;
     }
