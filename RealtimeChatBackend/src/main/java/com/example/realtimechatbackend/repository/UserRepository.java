@@ -20,6 +20,17 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             "WHERE u.username != :currentUsername AND u.isDeleted = false AND u NOT IN " +
            "(SELECT u2 FROM ChatRoom " +
             "c JOIN c.users u1 JOIN c.users u2 " +
-            "WHERE c.isGroup = false AND u1.username = :currentUsername)")
+            "WHERE c.isGroup = false AND u1.username = :currentUsername AND u2.username != :currentUsername)")
     List<User> findRecommendedUsers(@Param("currentUsername") String currentUsername);
+
+    @Query("SELECT u FROM User u " +
+            "WHERE u.username != :currentUsername AND u.isDeleted = false " +
+            "AND LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "AND u NOT IN " +
+           "(SELECT u2 FROM ChatRoom " +
+            "c JOIN c.users u1 JOIN c.users u2 " +
+            "WHERE c.isGroup = false AND u1.username = :currentUsername AND u2.username != :currentUsername)")
+    List<User> searchUsersExcludingPrivateContacts(@Param("query") String query, @Param("currentUsername") String currentUsername);
+
+    List<User> findByUsernameNotAndIsDeletedFalse(String username);
 }
