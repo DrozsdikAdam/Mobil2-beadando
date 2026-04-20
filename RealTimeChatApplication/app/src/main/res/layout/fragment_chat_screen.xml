@@ -22,7 +22,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/go_back_arrow"
             android:src="@drawable/abc_ic_ab_back_material"
-            app:tint="@color/white" />
+            app:tint="@color/main_icon_tint" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/chatPartnerImage"
@@ -33,7 +33,7 @@
             android:padding="2dp"
             android:scaleType="centerCrop"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent"
-            app:strokeColor="@color/TextBlue"
+            app:strokeColor="?attr/uiColor"
             app:strokeWidth="1dp"
             tools:src="@tools:sample/avatars" />
 
@@ -50,7 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Partner Neve"
-                android:textColor="@color/white"
+                android:textColor="@color/main_text"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -58,7 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Online"
-                android:textColor="@color/TextBlue"
+                android:textColor="?attr/uiColor"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -70,7 +70,7 @@
             android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_call"
-            app:tint="@color/white" />
+            app:tint="@color/main_icon_tint" />
 
     </RelativeLayout>
 
@@ -103,7 +103,7 @@
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_add"
-            app:tint="@color/white" />
+            app:tint="@color/main_icon_tint" />
 
         <EditText
             android:id="@+id/editTextMessage"
@@ -117,7 +117,7 @@
             android:inputType="textMultiLine"
             android:maxLines="4"
             android:paddingVertical="8dp"
-            android:textColor="@color/white"
+            android:textColor="@color/main_text"
             android:textColorHint="@color/light_gray" />
 
         <ImageButton
@@ -126,7 +126,7 @@
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_send"
-            app:tint="@color/TextBlue" />
+            app:tint="?attr/uiColor" />
 
     </LinearLayout>
 </LinearLayout>

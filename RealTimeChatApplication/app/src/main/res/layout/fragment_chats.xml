@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/toolbar_menu"
         app:title="@string/toolbar_title"
-        app:titleTextColor="@color/TextBlue" />
+        app:titleTextColor="?attr/uiColor" />
 
     <View
         android:id="@+id/toolbar_divider"

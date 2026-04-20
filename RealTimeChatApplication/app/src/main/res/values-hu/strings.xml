@@ -58,4 +58,6 @@
     <string name="search_hint">Név vagy email keresése</string>
     <string name="add_friend">Hozzáadás</string>
     <string name="suggested_friends">Javasolt ismerősök</string>
+
+    <string name="choose_color">Válassz színt</string>
 </resources>

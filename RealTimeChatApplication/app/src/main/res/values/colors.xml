@@ -1,13 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Világos mód színei -->
-    <color name="black">#FFFFFFFF</color> <!-- Világos módban a 'black' nevű dolog legyen fehér (ha így nevezted el) -->
-    <color name="white">#FF000000</color> <!-- Világos módban a 'white' nevű dolog legyen fekete -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
     <color name="DarkBg">#F5F5F5</color>
-    <color name="TextBlue">#007ACC</color>
     <color name="light_gray">#444444</color>
     <color name="medium_gray">#666666</color>
     <color name="divider_color">#22000000</color>
     <color name="nav_item_unselected">#666666</color>
     <color name="recived_msg_bg">#E0E0E0</color>
+
+    <!-- Szemantikus színek (Világos mód) -->
+    <color name="main_text">@color/black</color>
+    <color name="main_icon_tint">@color/black</color>
+
+    <!-- UI Választható színek -->
+    <color name="ui_blue">#007ACC</color>
+    <color name="ui_red">#E53935</color>
+    <color name="ui_green">#43A047</color>
+    <color name="ui_orange">#FB8C00</color>
+    <color name="ui_purple">#8E24AA</color>
+    <color name="ui_teal">#00897B</color>
+    <color name="ui_pink">#D81B60</color>
+    <color name="ui_indigo">#3949AB</color>
+
+    <!-- Dinamikus szín (alapértelmezett kék) -->
+    <color name="TextBlue">#007ACC</color>
 </resources>

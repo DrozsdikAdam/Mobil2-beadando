@@ -28,7 +28,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="@string/test_name"
-        android:textColor="@color/white"
+        android:textColor="@color/main_text"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/timeStamp"

@@ -63,4 +63,5 @@
 
     <!-- Chat strings -->
     <string name="write_message_hint">Üzenet írása...</string>
+    <string name="choose_color">Válassz színt</string>
 </resources>
