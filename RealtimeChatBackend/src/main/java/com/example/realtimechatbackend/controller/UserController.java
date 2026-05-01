@@ -70,8 +70,8 @@ public class UserController {
             response = userService.updateUsername(usernameRequest, currentUsername);
         }
 
-        if (response == null && (request.getNewPassword() != null || request.getNewEmail() != null)) {
-             response = AuthResponseDto.builder().token("").build();
+        if (response == null) {
+             response = userService.generateToken(currentUsername);
         }
 
         return ResponseEntity.ok(response);

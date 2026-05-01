@@ -106,4 +106,9 @@ public class UserService {
         user.setPassword(encodedPassword);
         userRepository.save(user);
     }
+    
+    public AuthResponseDto generateToken(String username) {
+        String token = jwtService.generateToken(username);
+        return AuthResponseDto.builder().token(token).build();
+    }
 }
