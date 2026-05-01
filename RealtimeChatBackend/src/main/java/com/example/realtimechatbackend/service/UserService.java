@@ -4,6 +4,7 @@ import com.example.realtimechatbackend.dto.AuthResponseDto;
 import com.example.realtimechatbackend.dto.CurrentUserProfileResponseDto;
 import com.example.realtimechatbackend.dto.UpdateEmailRequestDto;
 import com.example.realtimechatbackend.dto.UpdatePasswordRequestDto;
+import com.example.realtimechatbackend.dto.UpdateProfileRequestDto;
 import com.example.realtimechatbackend.dto.UpdateUsernameRequestDto;
 import com.example.realtimechatbackend.dto.UserProfileResponseDto;
 import com.example.realtimechatbackend.exception.InvalidPasswordFormatException;
@@ -25,34 +26,24 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final String PasswordValidatorRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
+
 
     public List<UserProfileResponseDto> searchUsers(String query, String currentUsername){
 
         List<User> users = userRepository.searchUsersExcludingPrivateContacts(query, currentUsername);
 
-        return users.stream().map(user -> UserProfileResponseDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .isOnline(user.getIsOnline())
-                .build()).toList();
+        return users.stream().map(user -> userProfileDtoMapper(user)).toList();
     }
 
     public List<UserProfileResponseDto> getRecommendedUsers(String username){
         return userRepository.findRecommendedUsers(username)
-                .stream().map(user -> UserProfileResponseDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .isOnline(user.getIsOnline())
-                .build()).toList();
+                .stream().map(user -> userProfileDtoMapper(user)).toList();
     }
 
     public List<UserProfileResponseDto> getAllUsers(String currentUsername){
         return userRepository.findByUsernameNotAndIsDeletedFalse(currentUsername)
-                .stream().map(user -> UserProfileResponseDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .isOnline(user.getIsOnline())
-                .build()).toList();
+                .stream().map(user -> userProfileDtoMapper(user)).toList();
     }
 
     public CurrentUserProfileResponseDto getCurrentUser(String username){
@@ -65,6 +56,42 @@ public class UserService {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .isOnline(user.getIsOnline()).build();
+    }
+
+    private UserProfileResponseDto userProfileDtoMapper(User user) {
+        return UserProfileResponseDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .isOnline(user.getIsOnline())
+                .build();
+    }
+
+    public AuthResponseDto updateProfile(UpdateProfileRequestDto request, String currentUsername) {
+        AuthResponseDto response = null;
+
+        if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
+            UpdatePasswordRequestDto passwordRequest = new UpdatePasswordRequestDto();
+            passwordRequest.setNewPassword(request.getNewPassword());
+            updatePassword(passwordRequest, currentUsername);
+        }
+
+        if (request.getNewEmail() != null && !request.getNewEmail().isBlank()) {
+            UpdateEmailRequestDto emailRequest = new UpdateEmailRequestDto();
+            emailRequest.setNewEmail(request.getNewEmail());
+            updateEmail(emailRequest, currentUsername);
+        }
+
+        if (request.getNewUsername() != null && !request.getNewUsername().isBlank() && !request.getNewUsername().equals(currentUsername)) {
+            UpdateUsernameRequestDto usernameRequest = new UpdateUsernameRequestDto();
+            usernameRequest.setNewUsername(request.getNewUsername());
+            response = updateUsername(usernameRequest, currentUsername);
+        }
+
+        if (response == null) {
+            response = generateToken(currentUsername);
+        }
+
+        return response;
     }
 
     public AuthResponseDto updateUsername(UpdateUsernameRequestDto request, String currentUsername) {
@@ -98,12 +125,17 @@ public class UserService {
         User user = userRepository.findByUsernameAndIsDeletedFalse(currentUsername)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if (!request.getNewPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")) {
+        if (!request.getNewPassword().matches(PasswordValidatorRegex)) {
             throw new InvalidPasswordFormatException("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character!");
         }
 
         String encodedPassword = passwordEncoder.encode(request.getNewPassword());
         user.setPassword(encodedPassword);
         userRepository.save(user);
+    }
+    
+    public AuthResponseDto generateToken(String username) {
+        String token = jwtService.generateToken(username);
+        return AuthResponseDto.builder().token(token).build();
     }
 }

@@ -7,6 +7,7 @@ import com.example.realtimechatbackend.dto.MessageResponseDto;
 import com.example.realtimechatbackend.exception.InvalidGroupException;
 import com.example.realtimechatbackend.exception.UserNotFoundException;
 import com.example.realtimechatbackend.model.ChatRoom;
+import com.example.realtimechatbackend.model.Message;
 import com.example.realtimechatbackend.model.User;
 import com.example.realtimechatbackend.repository.ChatRoomRepository;
 import com.example.realtimechatbackend.repository.UserRepository;
@@ -30,48 +31,56 @@ public class ChatRoomService {
 
     @Transactional
     public CreateRoomResponseDto createRoom(CreateRoomRequestDto request, String username) {
-        Optional<User> currentUser = userRepository.findByUsernameAndIsDeletedFalse(username);
-        if (currentUser.isEmpty()) throw new UserNotFoundException("User not found");
-
-        List<UUID> failedToAdd = new ArrayList<>();
+        User currentUser = userRepository.findByUsernameAndIsDeletedFalse(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (Boolean.TRUE.equals(request.getIsGroup())) {
-            Set<User> members = new HashSet<>();
-            members.add(currentUser.get());
-
-            for (UUID userId : request.getUserIds()) {
-                Optional<User> user = userRepository.findById(userId);
-                if (user.isPresent()) {
-                    members.add(user.get());
-                } else {
-                    failedToAdd.add(userId);
-                }
-            }
-
-            if (members.size() < 2) {
-                throw new InvalidGroupException("Cannot create a group without any valid members!");
-            }
-
-            ChatRoom chatRoom = new ChatRoom();
-            chatRoom.setName(request.getName());
-            chatRoom.setIsGroup(request.getIsGroup());
-            chatRoom.setUsers(members);
-
-            ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
-
-            return CreateRoomResponseDto.builder()
-                    .chatRoomId(savedRoom.getId())
-                    .name(savedRoom.getName())
-                    .isGroup(savedRoom.getIsGroup())
-                    .failedToAddUsers(failedToAdd)
-                    .build();
-
+            return createGroupRoom(request, currentUser);
         }
 
-        Optional<User> otherProfile = userRepository.findById(request.getUserIds().getFirst());
-        if (otherProfile.isEmpty()) throw new UserNotFoundException("User with id " + request.getUserIds().getFirst() + " not found");
+        return createPrivateRoom(request, currentUser);
+
+    }
+
+    private CreateRoomResponseDto createGroupRoom(CreateRoomRequestDto request, User currentUser) {
+        List<UUID> failedToAdd = new ArrayList<>();
+        Set<User> members = new HashSet<>();
+        members.add(currentUser);
+
+        for (UUID userId : request.getUserIds()) {
+            Optional<User> user = userRepository.findById(userId);
+            if (user.isPresent()) {
+                members.add(user.get());
+            } else {
+                failedToAdd.add(userId);
+            }
+        }
+
+        if (members.size() < 2) {
+            throw new InvalidGroupException("Cannot create a group without any valid members!");
+        }
+
+        ChatRoom chatRoom = new ChatRoom();
+        chatRoom.setName(request.getName());
+        chatRoom.setIsGroup(request.getIsGroup());
+        chatRoom.setUsers(members);
+
+        ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
+
+        return CreateRoomResponseDto.builder()
+                .chatRoomId(savedRoom.getId())
+                .name(savedRoom.getName())
+                .isGroup(savedRoom.getIsGroup())
+                .failedToAddUsers(failedToAdd)
+                .build();
+    }
+
+    private CreateRoomResponseDto createPrivateRoom(CreateRoomRequestDto request, User currentUser) {
+        UUID otherUserId = request.getUserIds().getFirst();
+        User otherProfile = userRepository.findById(otherUserId)
+                .orElseThrow(() -> new UserNotFoundException("User with id " + otherUserId + " not found"));
         
-        Optional<ChatRoom> existingRoom = chatRoomRepository.findPrivateRoomBetweenUsers(currentUser.get(), otherProfile.get());
+        Optional<ChatRoom> existingRoom = chatRoomRepository.findPrivateRoomBetweenUsers(currentUser, otherProfile);
         if (existingRoom.isPresent()) {
              return CreateRoomResponseDto.builder()
                     .chatRoomId(existingRoom.get().getId())
@@ -82,8 +91,8 @@ public class ChatRoomService {
         }
         
         Set<User> members = new HashSet<>();
-        members.add(currentUser.get());
-        members.add(otherProfile.get());
+        members.add(currentUser);
+        members.add(otherProfile);
 
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.setName(request.getName());
@@ -101,22 +110,13 @@ public class ChatRoomService {
 
     @Transactional(readOnly = true)
     public Set<ChatRoomResponseDto> getUserRooms(String username) {
-        Optional<User> currentUser = userRepository.findByUsernameAndIsDeletedFalse(username);
-        if (currentUser.isEmpty()) throw new UserNotFoundException("User not found");
+        User currentUser = userRepository.findByUsernameAndIsDeletedFalse(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        Set<ChatRoom> chatRooms = chatRoomRepository.findByUsersContaining(currentUser.get());
+        Set<ChatRoom> chatRooms = chatRoomRepository.findByUsersContaining(currentUser);
         
         return chatRooms.stream().map(room -> {
-            MessageResponseDto lastMsgDto = null;
-            if (room.getLastMessage() != null) {
-                lastMsgDto = MessageResponseDto.builder()
-                        .id(room.getLastMessage().getId())
-                        .content(room.getLastMessage().getContent())
-                        .senderUsername(room.getLastMessage().getSender().getUsername())
-                        .chatRoomId(room.getId())
-                        .timestamp(room.getLastMessage().getTimestamp())
-                        .build();
-            }
+            MessageResponseDto lastMsgDto = room.getLastMessage() != null ? toMessageResponseDto(room.getLastMessage()) : null;
             
             return ChatRoomResponseDto.builder()
                     .id(room.getId())
@@ -125,5 +125,15 @@ public class ChatRoomService {
                     .lastMessage(lastMsgDto)
                     .build();
         }).collect(Collectors.toSet());
+    }
+
+    private MessageResponseDto toMessageResponseDto(Message message) {
+        return MessageResponseDto.builder()
+                .id(message.getId())
+                .content(message.getContent())
+                .senderUsername(message.getSender().getUsername())
+                .chatRoomId(message.getChatRoom().getId())
+                .timestamp(message.getTimestamp())
+                .build();
     }
 }

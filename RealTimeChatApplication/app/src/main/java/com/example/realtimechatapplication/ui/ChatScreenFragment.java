@@ -154,7 +154,7 @@ public class ChatScreenFragment extends Fragment {
                     List<MessageResponseDto> content = response.body().getContent();
                     if (content != null) {
                         for (MessageResponseDto dto : content) {
-                            messageList.add(mapDtoToModel(dto));
+                            messageList.add(MessageModel.fromDto(dto, currentUserId, currentUsername));
                         }
                         // Megfordítjuk, hogy a legújabb legyen alul (index növekszik időrendben)
                         Collections.reverse(messageList);
@@ -188,7 +188,7 @@ public class ChatScreenFragment extends Fragment {
                         getActivity().runOnUiThread(() -> {
                             // Csak akkor adjuk hozzá, ha NEM mi küldtük (mivel mi már optimistán hozzáadtuk)
                             if (!dto.getSenderUsername().equals(currentUsername)) {
-                                MessageModel model = mapDtoToModel(dto);
+                                MessageModel model = MessageModel.fromDto(dto, currentUserId, currentUsername);
                                 messageList.add(model);
                                 if (messageAdapter != null) {
                                     messageAdapter.notifyItemInserted(messageList.size() - 1);
@@ -209,24 +209,6 @@ public class ChatScreenFragment extends Fragment {
         if (currentChatRoomId != null) {
             webSocketManager.subscribeToChat(currentChatRoomId);
         }
-    }
-
-    private MessageModel mapDtoToModel(MessageResponseDto dto) {
-        MessageModel model = new MessageModel();
-        model.setId(dto.getId().toString());
-        model.setContent(dto.getContent());
-        
-        UserModel sender = new UserModel();
-        sender.setUserName(dto.getSenderUsername());
-        
-        if (dto.getSenderUsername().equals(currentUsername)) {
-            sender.setUserId(currentUserId);
-        } else {
-            sender.setUserId("other_user_" + dto.getSenderUsername());
-        }
-        
-        model.setSender(sender);
-        return model;
     }
 
     @Override

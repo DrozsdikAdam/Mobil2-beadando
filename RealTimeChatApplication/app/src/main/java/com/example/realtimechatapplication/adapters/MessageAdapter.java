@@ -43,13 +43,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         MessageModel message = messageList.get(position);
-        holder.tvMessage.setText(message.getContent());
+        holder.bind(message);
     }
 
     @Override
     public int getItemViewType(int position) {
         MessageModel message = messageList.get(position);
-        if (message != null && message.getSender() != null && message.getSender().getUserId().equals(currentUserId)) {
+        if (message != null && message.isSentBy(currentUserId)) {
             return TYPE_SENT;
         } else {
             return TYPE_RECEIVED;
@@ -63,9 +63,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     static class MessageViewHolder extends RecyclerView.ViewHolder {
         TextView tvMessage;
+        TextView tvSenderName;
+        
         MessageViewHolder(@NonNull View itemView) {
             super(itemView);
             tvMessage = itemView.findViewById(R.id.tvMessage);
+            tvSenderName = itemView.findViewById(R.id.tvSenderName);
+        }
+        
+        void bind(MessageModel message) {
+            tvMessage.setText(message.getContent());
+            if (message.getSender() != null && message.getSender().getUserName() != null) {
+                tvSenderName.setText(message.getSender().getUserName());
+            } else {
+                tvSenderName.setText("");
+            }
         }
     }
 }
