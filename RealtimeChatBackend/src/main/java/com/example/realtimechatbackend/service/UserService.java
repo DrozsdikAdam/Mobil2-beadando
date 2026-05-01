@@ -4,6 +4,7 @@ import com.example.realtimechatbackend.dto.AuthResponseDto;
 import com.example.realtimechatbackend.dto.CurrentUserProfileResponseDto;
 import com.example.realtimechatbackend.dto.UpdateEmailRequestDto;
 import com.example.realtimechatbackend.dto.UpdatePasswordRequestDto;
+import com.example.realtimechatbackend.dto.UpdateProfileRequestDto;
 import com.example.realtimechatbackend.dto.UpdateUsernameRequestDto;
 import com.example.realtimechatbackend.dto.UserProfileResponseDto;
 import com.example.realtimechatbackend.exception.InvalidPasswordFormatException;
@@ -65,6 +66,34 @@ public class UserService {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .isOnline(user.getIsOnline()).build();
+    }
+
+    public AuthResponseDto updateProfile(UpdateProfileRequestDto request, String currentUsername) {
+        AuthResponseDto response = null;
+
+        if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
+            UpdatePasswordRequestDto passwordRequest = new UpdatePasswordRequestDto();
+            passwordRequest.setNewPassword(request.getNewPassword());
+            updatePassword(passwordRequest, currentUsername);
+        }
+
+        if (request.getNewEmail() != null && !request.getNewEmail().isBlank()) {
+            UpdateEmailRequestDto emailRequest = new UpdateEmailRequestDto();
+            emailRequest.setNewEmail(request.getNewEmail());
+            updateEmail(emailRequest, currentUsername);
+        }
+
+        if (request.getNewUsername() != null && !request.getNewUsername().isBlank() && !request.getNewUsername().equals(currentUsername)) {
+            UpdateUsernameRequestDto usernameRequest = new UpdateUsernameRequestDto();
+            usernameRequest.setNewUsername(request.getNewUsername());
+            response = updateUsername(usernameRequest, currentUsername);
+        }
+
+        if (response == null) {
+            response = generateToken(currentUsername);
+        }
+
+        return response;
     }
 
     public AuthResponseDto updateUsername(UpdateUsernameRequestDto request, String currentUsername) {

@@ -49,31 +49,7 @@ public class UserController {
 
     @PutMapping("/me")
     public ResponseEntity<AuthResponseDto> updateProfile(@RequestBody UpdateProfileRequestDto request, Principal principal) {
-        String currentUsername = principal.getName();
-        AuthResponseDto response = null;
-
-        if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
-            UpdatePasswordRequestDto passwordRequest = new UpdatePasswordRequestDto();
-            passwordRequest.setNewPassword(request.getNewPassword());
-            userService.updatePassword(passwordRequest, currentUsername);
-        }
-
-        if (request.getNewEmail() != null && !request.getNewEmail().isBlank()) {
-            UpdateEmailRequestDto emailRequest = new UpdateEmailRequestDto();
-            emailRequest.setNewEmail(request.getNewEmail());
-            userService.updateEmail(emailRequest, currentUsername);
-        }
-
-        if (request.getNewUsername() != null && !request.getNewUsername().isBlank() && !request.getNewUsername().equals(currentUsername)) {
-            UpdateUsernameRequestDto usernameRequest = new UpdateUsernameRequestDto();
-            usernameRequest.setNewUsername(request.getNewUsername());
-            response = userService.updateUsername(usernameRequest, currentUsername);
-        }
-
-        if (response == null) {
-             response = userService.generateToken(currentUsername);
-        }
-
+        AuthResponseDto response = userService.updateProfile(request, principal.getName());
         return ResponseEntity.ok(response);
     }
 }
