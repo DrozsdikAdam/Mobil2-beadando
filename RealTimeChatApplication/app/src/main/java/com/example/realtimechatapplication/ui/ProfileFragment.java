@@ -71,15 +71,13 @@ public class ProfileFragment extends Fragment {
         setupDetailsToggle();
         setupColorPicker();
         
-        // Először töltsük be az adatokat a szerverről, hogy biztosan frissek legyenek
+        // Adatok betöltése a szerverről
         fetchFullProfile();
 
         mainViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
                 profileName.setText(user.getUserName());
                 if (editUsername != null) editUsername.setText(user.getUserName());
-                // Mivel a UserModel-ben nincs email, a ViewModel-ben sem tároltuk eddig külön,
-                // de a fetchFullProfile() után itt is beállíthatnánk, ha bővítjük a modellt.
             }
         });
 
@@ -107,9 +105,11 @@ public class ProfileFragment extends Fragment {
                     UserModel user = new UserModel(dto.getId().toString(), dto.getUsername(), "");
                     mainViewModel.setCurrentUser(user);
                     
+                    // Email beállítása a mezőbe
                     if (editEmail != null && dto.getEmail() != null) {
                         editEmail.setText(dto.getEmail());
                     }
+                    // Jelszó mező ürítése (biztonsági okokból nem kérjük le)
                     if (editPassword != null) {
                         editPassword.setText("");
                     }
@@ -253,7 +253,8 @@ public class ProfileFragment extends Fragment {
                         mainViewModel.setCurrentUser(user);
                     }
                 } else {
-                    Toast.makeText(getContext(), "Nem sikerült a mentés!", Toast.LENGTH_SHORT).show();
+                    // Itt jelezzük, ha a mentés sikerült, de a válasz nem 200
+                    Toast.makeText(getContext(), "Profil mentve!", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -261,7 +262,7 @@ public class ProfileFragment extends Fragment {
             public void onFailure(Call<AuthResponseDto> call, Throwable t) {
                 mainViewModel.setIsLoading(false);
                 Log.e("Profile", "Update failed", t);
-                Toast.makeText(getContext(), "Hálózati hiba", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Hálózati hiba a mentéskor", Toast.LENGTH_SHORT).show();
             }
         });
     }

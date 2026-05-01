@@ -44,6 +44,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         MessageModel message = messageList.get(position);
         holder.tvMessage.setText(message.getContent());
+        if (message.getSender() != null && message.getSender().getUserName() != null) {
+            holder.tvSenderName.setText(message.getSender().getUserName());
+        } else {
+            holder.tvSenderName.setText("");
+        }
     }
 
     @Override
@@ -63,9 +68,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     static class MessageViewHolder extends RecyclerView.ViewHolder {
         TextView tvMessage;
+        TextView tvSenderName;
         MessageViewHolder(@NonNull View itemView) {
             super(itemView);
             tvMessage = itemView.findViewById(R.id.tvMessage);
+            tvSenderName = itemView.findViewById(R.id.tvSenderName);
         }
     }
 }
