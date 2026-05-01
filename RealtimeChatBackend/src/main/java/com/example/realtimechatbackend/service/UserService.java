@@ -26,34 +26,24 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final String PasswordValidatorRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
+
 
     public List<UserProfileResponseDto> searchUsers(String query, String currentUsername){
 
         List<User> users = userRepository.searchUsersExcludingPrivateContacts(query, currentUsername);
 
-        return users.stream().map(user -> UserProfileResponseDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .isOnline(user.getIsOnline())
-                .build()).toList();
+        return users.stream().map(user -> userProfileDtoMapper(user)).toList();
     }
 
     public List<UserProfileResponseDto> getRecommendedUsers(String username){
         return userRepository.findRecommendedUsers(username)
-                .stream().map(user -> UserProfileResponseDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .isOnline(user.getIsOnline())
-                .build()).toList();
+                .stream().map(user -> userProfileDtoMapper(user)).toList();
     }
 
     public List<UserProfileResponseDto> getAllUsers(String currentUsername){
         return userRepository.findByUsernameNotAndIsDeletedFalse(currentUsername)
-                .stream().map(user -> UserProfileResponseDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .isOnline(user.getIsOnline())
-                .build()).toList();
+                .stream().map(user -> userProfileDtoMapper(user)).toList();
     }
 
     public CurrentUserProfileResponseDto getCurrentUser(String username){
@@ -66,6 +56,14 @@ public class UserService {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .isOnline(user.getIsOnline()).build();
+    }
+
+    private UserProfileResponseDto userProfileDtoMapper(User user) {
+        return UserProfileResponseDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .isOnline(user.getIsOnline())
+                .build();
     }
 
     public AuthResponseDto updateProfile(UpdateProfileRequestDto request, String currentUsername) {
@@ -127,7 +125,7 @@ public class UserService {
         User user = userRepository.findByUsernameAndIsDeletedFalse(currentUsername)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if (!request.getNewPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")) {
+        if (!request.getNewPassword().matches(PasswordValidatorRegex)) {
             throw new InvalidPasswordFormatException("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character!");
         }
 
