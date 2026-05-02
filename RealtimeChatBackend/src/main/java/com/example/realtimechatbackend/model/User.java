@@ -1,12 +1,7 @@
 package com.example.realtimechatbackend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -44,6 +39,9 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "users")
     @JsonIgnore
     private Set<ChatRoom> chatRooms = new HashSet<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ProfileImage profileImage;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
