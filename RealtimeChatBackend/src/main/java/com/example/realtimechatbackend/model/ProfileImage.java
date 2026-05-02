@@ -13,13 +13,12 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class ProfileImage {
-
     @Id
     @GeneratedValue
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name =  "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false)
@@ -27,5 +26,4 @@ public class ProfileImage {
 
     @Column(nullable = false)
     private String publicUrl;
-
 }
