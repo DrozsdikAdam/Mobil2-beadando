@@ -26,6 +26,6 @@ public class ProfileImage {
     private String bucketPath;
 
     @Column(nullable = false)
-    private String publivUrl;
+    private String publicUrl;
 
 }
