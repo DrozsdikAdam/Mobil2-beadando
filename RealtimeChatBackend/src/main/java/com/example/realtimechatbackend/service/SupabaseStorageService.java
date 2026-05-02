@@ -53,6 +53,36 @@ public class SupabaseStorageService {
         return bucketName + "/" + fileName;
     }
 
+    public void deleteImage(String bucketPath) {
+        if (bucketPath == null || !bucketPath.startsWith(bucketName + "/")) {
+            return;
+        }
+
+        String fileName = bucketPath.substring(bucketName.length() + 1);
+        String deleteUrl = String.format("%s/storage/v1/object/%s/%s", supabaseUrl, bucketName, fileName);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + supabaseKey);
+        headers.set("apikey", supabaseKey);
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    deleteUrl,
+                    HttpMethod.DELETE,
+                    requestEntity,
+                    String.class
+            );
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                System.err.println("Figyelem: Nem sikerült törölni a régi képet: " + bucketPath);
+            }
+        } catch (Exception e) {
+            System.err.println("Hiba a korábbi kép törlésekor: " + e.getMessage());
+        }
+    }
+
     public String getPublicUrl(String bucketPath) {
         // Formátum: [PROJECT_URL]/storage/v1/object/[BUCKET_NAME]/[FILE_NAME]
         return String.format("%s/storage/v1/object/public/%s", supabaseUrl, bucketPath);

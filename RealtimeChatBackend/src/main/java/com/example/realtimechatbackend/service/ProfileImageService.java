@@ -45,7 +45,12 @@ public class ProfileImageService {
         ProfileImage profileImage;
         if (existingImageOpt.isPresent()) {
             profileImage = existingImageOpt.get();
-            // TODO: Itt opcióként törölhetnéd is a régi fájlt a Storage-ből
+            // Töröljük a régi fájlt a Storage-ből
+            String oldBucketPath = profileImage.getBucketPath();
+            if (oldBucketPath != null && !oldBucketPath.isEmpty()) {
+                supabaseStorageService.deleteImage(oldBucketPath);
+            }
+
             profileImage.setBucketPath(bucketPath);
             profileImage.setPublicUrl(publicUrl);
         } else {
