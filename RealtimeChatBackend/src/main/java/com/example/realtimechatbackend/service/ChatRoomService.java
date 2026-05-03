@@ -170,7 +170,11 @@ public class ChatRoomService {
             throw new RuntimeException("Csak csoportos beszélgetésekhez lehet képet beállítani.");
         }
         
-        if (!chatRoom.getUsers().contains(currentUser)) {
+        // Memóriacím helyett egyértelműen ID alapján vizsgáljuk, hogy a felhasználó tagja-e a csoportnak
+        boolean isMember = chatRoom.getUsers().stream()
+                .anyMatch(user -> user.getId().equals(currentUser.getId()));
+                
+        if (!isMember) {
             throw new RuntimeException("Nincs jogosultságod módosítani ezt a csoportot.");
         }
 
