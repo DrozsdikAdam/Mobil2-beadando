@@ -3,15 +3,15 @@ package com.example.realtimechatapplication.models;
 public class UserModel {
     private String userId;
     private String userName;
-    private String profilePic;
+    private String profileImageUrl;
     private boolean isSelected = false;
 
     public UserModel() {}
 
-    public UserModel(String userId, String userName, String profilePic) {
+    public UserModel(String userId, String userName, String profileImageUrl) {
         this.userId = userId;
         this.userName = userName;
-        this.profilePic = profilePic;
+        this.profileImageUrl = profileImageUrl;
     }
 
     public String getUserId() { return userId; }
@@ -20,8 +20,8 @@ public class UserModel {
     public String getUserName() { return userName; }
     public void setUserName(String userName) { this.userName = userName; }
 
-    public String getProfilePic() { return profilePic; }
-    public void setProfilePic(String profilePic) { this.profilePic = profilePic; }
+    public String getProfileImageUrl() { return profileImageUrl; }
+    public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
 
     public boolean isSelected() { return isSelected; }
     public void setSelected(boolean selected) { isSelected = selected; }

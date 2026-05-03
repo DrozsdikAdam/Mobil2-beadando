@@ -8,14 +8,16 @@ public class ChatModel {
     private String name;
     private String lastMessage;
     private String timeStamp;
-    private int profileImage;
+    private String profileImageUrl;
+    private boolean isGroup;
 
-    public ChatModel(UUID id, String name, String lastMessage, String timeStamp, int profileImage) {
+    public ChatModel(UUID id, String name, String lastMessage, String timeStamp, String profileImageUrl, boolean isGroup) {
         this.id = id;
         this.name = name;
         this.lastMessage = lastMessage;
         this.timeStamp = timeStamp;
-        this.profileImage = profileImage;
+        this.profileImageUrl = profileImageUrl;
+        this.isGroup = isGroup;
     }
 
     public UUID getId() { return id; }
@@ -26,5 +28,7 @@ public class ChatModel {
 
     public String getTimeStamp() { return timeStamp; }
 
-    public int getProfileImage() { return profileImage; }
+    public String getProfileImageUrl() { return profileImageUrl; }
+
+    public boolean isGroup() { return isGroup; }
 }

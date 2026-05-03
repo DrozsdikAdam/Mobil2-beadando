@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -99,10 +98,10 @@ public class ChatsFragment extends Fragment {
                     for (ChatRoomDto dto : response.body()) {
                         String lastMsg = "";
                         String timeStamp = "";
-                        if (dto.getLastMessage() != null) {
-                            lastMsg = dto.getLastMessage().getContent();
-                            if (dto.getLastMessage().getTimestamp() != null) {
-                                timeStamp = formatTimestamp(dto.getLastMessage().getTimestamp());
+                        if (dto.lastMessage() != null) {
+                            lastMsg = dto.lastMessage().getContent();
+                            if (dto.lastMessage().getTimestamp() != null) {
+                                timeStamp = formatTimestamp(dto.lastMessage().getTimestamp());
                             }
                         }
                         chatList.add(new ChatModel(
@@ -110,7 +109,8 @@ public class ChatsFragment extends Fragment {
                                 dto.getName(),
                                 lastMsg,
                                 timeStamp,
-                                R.drawable.ic_person
+                                dto.getProfileImageUrl(),
+                                dto.getIsGroup() != null && dto.getIsGroup()
                         ));
                     }
                     chatAdapter.notifyDataSetChanged();
@@ -150,7 +150,6 @@ public class ChatsFragment extends Fragment {
 
     private String formatTimestamp(String isoTimestamp) {
         try {
-            // Backend sends ISO format like "2026-04-20T20:30:00"
             SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
             Date date = isoFormat.parse(isoTimestamp);
             if (date != null) {

@@ -7,6 +7,7 @@ public class UserProfileResponseDto {
     private String username;
     private String email;
     private Boolean isOnline;
+    private String profileImageUrl;
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -19,4 +20,7 @@ public class UserProfileResponseDto {
 
     public Boolean getIsOnline() { return isOnline; }
     public void setIsOnline(Boolean online) { isOnline = online; }
+
+    public String getProfileImageUrl() { return profileImageUrl; }
+    public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
 }

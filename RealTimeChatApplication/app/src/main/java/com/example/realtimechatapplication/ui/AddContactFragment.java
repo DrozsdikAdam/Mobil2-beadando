@@ -132,7 +132,7 @@ public class AddContactFragment extends Fragment {
     private void updateList(List<UserProfileResponseDto> dtos) {
         contactList.clear();
         for (UserProfileResponseDto dto : dtos) {
-            UserModel user = new UserModel(dto.getId().toString(), dto.getUsername(), "");
+            UserModel user = new UserModel(dto.getId().toString(), dto.getUsername(), dto.getProfileImageUrl());
             contactList.add(user);
         }
         adapter.notifyDataSetChanged();

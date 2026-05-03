@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -33,6 +34,16 @@ public class FriendSelectAdapter extends RecyclerView.Adapter<FriendSelectAdapte
     public void onBindViewHolder(@NonNull FriendViewHolder holder, int position) {
         UserModel user = friendList.get(position);
         holder.tvFriendName.setText(user.getUserName());
+
+        if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(user.getProfileImageUrl())
+                    .placeholder(R.drawable.ic_person)
+                    .error(R.drawable.ic_person)
+                    .into(holder.imgFriendProfile);
+        } else {
+            holder.imgFriendProfile.setImageResource(R.drawable.ic_person);
+        }
 
         if (user.isSelected()) {
             holder.btnSelectFriend.setImageResource(R.drawable.ic_close);
