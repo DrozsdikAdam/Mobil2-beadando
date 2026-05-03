@@ -85,7 +85,7 @@ public class CreateGroupFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     friendList.clear();
                     for (UserProfileResponseDto dto : response.body()) {
-                        friendList.add(new UserModel(dto.getId().toString(), dto.getUsername(), ""));
+                        friendList.add(new UserModel(dto.getId().toString(), dto.getUsername(), dto.getProfileImageUrl()));
                     }
                     adapter.notifyDataSetChanged();
                 }
