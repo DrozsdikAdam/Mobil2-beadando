@@ -11,6 +11,7 @@ import com.example.realtimechatbackend.exception.InvalidPasswordFormatException;
 import com.example.realtimechatbackend.exception.UserAlreadyExistsException;
 import com.example.realtimechatbackend.exception.UserNotFoundException;
 import com.example.realtimechatbackend.exception.UsernameAlreadyInUseException;
+import com.example.realtimechatbackend.model.ProfileImage;
 import com.example.realtimechatbackend.model.User;
 import com.example.realtimechatbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final ProfileImageService profileImageService;
     private final String PasswordValidatorRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
 
 
@@ -50,19 +52,38 @@ public class UserService {
         User user = userRepository.findByUsernameAndIsDeletedFalse(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         
+        String profileImageUrl = null;
+        ProfileImage profileImage = user.getProfileImage();
+        if (profileImage != null) {
+            profileImageUrl = profileImage.getPublicUrl();
+        } else {
+            profileImageUrl = profileImageService.getProfileImageUrl(user.getId());
+        }
+
         return CurrentUserProfileResponseDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .password(user.getPassword())
-                .isOnline(user.getIsOnline()).build();
+                .isOnline(user.getIsOnline())
+                .profileImageUrl(profileImageUrl)
+                .build();
     }
 
     private UserProfileResponseDto userProfileDtoMapper(User user) {
+        String profileImageUrl = null;
+        ProfileImage profileImage = user.getProfileImage();
+        if (profileImage != null) {
+            profileImageUrl = profileImage.getPublicUrl();
+        } else {
+            profileImageUrl = profileImageService.getProfileImageUrl(user.getId());
+        }
+        
         return UserProfileResponseDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .isOnline(user.getIsOnline())
+                .profileImageUrl(profileImageUrl)
                 .build();
     }
 
