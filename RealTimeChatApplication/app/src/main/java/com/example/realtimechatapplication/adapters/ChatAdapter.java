@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.models.ChatModel;
@@ -36,7 +37,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         holder.nameText.setText(chat.getName());
         holder.lastMsgText.setText(chat.getLastMessage());
         holder.timeText.setText(chat.getTimeStamp());
-        holder.profileImage.setImageResource(chat.getProfileImage());
+        
+        if (chat.getProfileImageUrl() != null && !chat.getProfileImageUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(chat.getProfileImageUrl())
+                    .placeholder(R.drawable.ic_person)
+                    .error(R.drawable.ic_person)
+                    .into(holder.profileImage);
+        } else {
+            holder.profileImage.setImageResource(R.drawable.ic_person);
+        }
 
         holder.itemView.setOnClickListener(v -> {
             AppCompatActivity activity = (AppCompatActivity) v.getContext();
@@ -44,6 +54,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             
             mainViewModel.setSelectedChatId(chat.getId().toString());
             mainViewModel.setSelectedChatPartnerName(chat.getName());
+            mainViewModel.setSelectedChatPartnerImageUrl(chat.getProfileImageUrl());
+            mainViewModel.setIsSelectedChatGroup(chat.isGroup());
 
             Navigation.findNavController(v).navigate(R.id.chatScreenFragment);
         });
