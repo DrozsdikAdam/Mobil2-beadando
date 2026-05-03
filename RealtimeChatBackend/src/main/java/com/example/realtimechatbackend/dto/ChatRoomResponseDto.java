@@ -16,4 +16,5 @@ public class ChatRoomResponseDto {
     private String name;
     private Boolean isGroup;
     private MessageResponseDto lastMessage;
+    private String profileImageUrl;
 }

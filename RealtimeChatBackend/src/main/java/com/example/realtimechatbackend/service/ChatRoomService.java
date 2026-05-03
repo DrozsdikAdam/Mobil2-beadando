@@ -8,6 +8,7 @@ import com.example.realtimechatbackend.exception.InvalidGroupException;
 import com.example.realtimechatbackend.exception.UserNotFoundException;
 import com.example.realtimechatbackend.model.ChatRoom;
 import com.example.realtimechatbackend.model.Message;
+import com.example.realtimechatbackend.model.ProfileImage;
 import com.example.realtimechatbackend.model.User;
 import com.example.realtimechatbackend.repository.ChatRoomRepository;
 import com.example.realtimechatbackend.repository.UserRepository;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final ProfileImageService profileImageService;
 
     @Transactional
     public CreateRoomResponseDto createRoom(CreateRoomRequestDto request, String username) {
@@ -118,11 +120,34 @@ public class ChatRoomService {
         return chatRooms.stream().map(room -> {
             MessageResponseDto lastMsgDto = room.getLastMessage() != null ? toMessageResponseDto(room.getLastMessage()) : null;
             
+            String roomName = room.getName();
+            String profileImageUrl = null;
+
+            // Ha privát szoba (nem group), akkor a név legyen a másik felhasználó neve
+            if (!Boolean.TRUE.equals(room.getIsGroup())) {
+                User otherUser = room.getUsers().stream()
+                        .filter(user -> !user.getId().equals(currentUser.getId()))
+                        .findFirst()
+                        .orElse(null);
+                
+                if (otherUser != null) {
+                    roomName = otherUser.getUsername();
+                    
+                    ProfileImage profileImage = otherUser.getProfileImage();
+                    if (profileImage != null) {
+                        profileImageUrl = profileImage.getPublicUrl();
+                    } else {
+                        profileImageUrl = profileImageService.getProfileImageUrl(otherUser.getId());
+                    }
+                }
+            }
+            
             return ChatRoomResponseDto.builder()
                     .id(room.getId())
-                    .name(room.getName())
+                    .name(roomName)
                     .isGroup(room.getIsGroup())
                     .lastMessage(lastMsgDto)
+                    .profileImageUrl(profileImageUrl)
                     .build();
         }).collect(Collectors.toSet());
     }
