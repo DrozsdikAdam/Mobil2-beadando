@@ -8,13 +8,16 @@ import com.example.realtimechatbackend.exception.InvalidGroupException;
 import com.example.realtimechatbackend.exception.UserNotFoundException;
 import com.example.realtimechatbackend.model.ChatRoom;
 import com.example.realtimechatbackend.model.Message;
+import com.example.realtimechatbackend.model.ProfileImage;
 import com.example.realtimechatbackend.model.User;
 import com.example.realtimechatbackend.repository.ChatRoomRepository;
 import com.example.realtimechatbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +31,9 @@ import java.util.stream.Collectors;
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final ProfileImageService profileImageService;
+    private final ImageProcessingService imageProcessingService;
+    private final SupabaseStorageService supabaseStorageService;
 
     @Transactional
     public CreateRoomResponseDto createRoom(CreateRoomRequestDto request, String username) {
@@ -118,13 +124,73 @@ public class ChatRoomService {
         return chatRooms.stream().map(room -> {
             MessageResponseDto lastMsgDto = room.getLastMessage() != null ? toMessageResponseDto(room.getLastMessage()) : null;
             
+            String roomName = room.getName();
+            String profileImageUrl = null;
+
+            if (!Boolean.TRUE.equals(room.getIsGroup())) {
+                User otherUser = room.getUsers().stream()
+                        .filter(user -> !user.getId().equals(currentUser.getId()))
+                        .findFirst()
+                        .orElse(null);
+                
+                if (otherUser != null) {
+                    roomName = otherUser.getUsername();
+                    
+                    ProfileImage profileImage = otherUser.getProfileImage();
+                    if (profileImage != null) {
+                        profileImageUrl = profileImage.getPublicUrl();
+                    } else {
+                        profileImageUrl = profileImageService.getProfileImageUrl(otherUser.getId());
+                    }
+                }
+            } else {
+                // Ha group chat, visszaadjuk a csoport saját képét, ha van
+                profileImageUrl = room.getGroupImageUrl();
+            }
+            
             return ChatRoomResponseDto.builder()
                     .id(room.getId())
-                    .name(room.getName())
+                    .name(roomName)
                     .isGroup(room.getIsGroup())
                     .lastMessage(lastMsgDto)
+                    .profileImageUrl(profileImageUrl)
                     .build();
         }).collect(Collectors.toSet());
+    }
+    
+    @Transactional
+    public String updateGroupImage(UUID roomId, MultipartFile file, String username) throws IOException {
+        User currentUser = userRepository.findByUsernameAndIsDeletedFalse(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("A chatszoba nem található"));
+                
+        if (!Boolean.TRUE.equals(chatRoom.getIsGroup())) {
+            throw new RuntimeException("Csak csoportos beszélgetésekhez lehet képet beállítani.");
+        }
+        
+        if (!chatRoom.getUsers().contains(currentUser)) {
+            throw new RuntimeException("Nincs jogosultságod módosítani ezt a csoportot.");
+        }
+
+        byte[] webpBytes = imageProcessingService.processProfileImage(file);
+
+        String fileName = "group_" + roomId.toString() + "_" + UUID.randomUUID().toString() + ".webp";
+
+        String bucketPath = supabaseStorageService.uploadImage(webpBytes, fileName);
+        String publicUrl = supabaseStorageService.getPublicUrl(bucketPath);
+
+        String oldBucketPath = chatRoom.getGroupImageBucketPath();
+        if (oldBucketPath != null && !oldBucketPath.isEmpty()) {
+            supabaseStorageService.deleteImage(oldBucketPath);
+        }
+        
+        chatRoom.setGroupImageBucketPath(bucketPath);
+        chatRoom.setGroupImageUrl(publicUrl);
+        chatRoomRepository.save(chatRoom);
+        
+        return publicUrl;
     }
 
     private MessageResponseDto toMessageResponseDto(Message message) {

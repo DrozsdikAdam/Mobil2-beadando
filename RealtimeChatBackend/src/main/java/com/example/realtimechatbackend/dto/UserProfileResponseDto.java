@@ -12,4 +12,5 @@ public class UserProfileResponseDto {
     private UUID id;
     private String username;
     private Boolean isOnline;
+    private String profileImageUrl;
 }

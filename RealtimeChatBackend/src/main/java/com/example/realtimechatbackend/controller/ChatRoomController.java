@@ -7,9 +7,13 @@ import com.example.realtimechatbackend.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/rooms")
@@ -26,5 +30,25 @@ public class ChatRoomController {
     @GetMapping
     public ResponseEntity<Set<ChatRoomResponseDto>> getUserRooms(Principal principal) {
         return ResponseEntity.ok(chatRoomService.getUserRooms(principal.getName()));
+    }
+
+    @PostMapping("/{roomId}/image")
+    public ResponseEntity<?> updateGroupImage(
+            @PathVariable UUID roomId,
+            @RequestParam("file") MultipartFile file,
+            Principal principal) {
+        try {
+            String newImageUrl = chatRoomService.updateGroupImage(roomId, file, principal.getName());
+            return ResponseEntity.ok(Map.of(
+                    "message", "Csoportkép sikeresen frissítve",
+                    "publicUrl", newImageUrl
+            ));
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Hiba történt a kép feldolgozása során."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 }
