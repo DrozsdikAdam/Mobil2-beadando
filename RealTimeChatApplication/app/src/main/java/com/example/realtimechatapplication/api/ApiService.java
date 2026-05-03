@@ -2,7 +2,9 @@ package com.example.realtimechatapplication.api;
 
 import com.example.realtimechatapplication.api.dto.*;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -41,4 +43,21 @@ public interface ApiService {
 
     @PUT("/api/users/me")
     Call<AuthResponseDto> updateProfile(@Body UpdateProfileRequestDto request);
+
+    @Multipart
+    @POST("/api/users/{userId}/profile-image")
+    Call<Map<String, String>> uploadProfileImage(
+            @Path("userId") UUID userId,
+            @Part MultipartBody.Part file
+    );
+
+    @GET("/api/users/{userId}/profile-image")
+    Call<Map<String, String>> getProfileImage(@Path("userId") UUID userId);
+
+    @Multipart
+    @POST("/api/rooms/{roomId}/profile-image")
+    Call<Map<String, String>> uploadRoomImage(
+            @Path("roomId") UUID roomId,
+            @Part MultipartBody.Part file
+    );
 }
