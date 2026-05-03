@@ -17,4 +17,5 @@ public class CurrentUserProfileResponseDto {
     private String email;
     private String password;
     private Boolean isOnline;
+    private String profileImageUrl;
 }
