@@ -19,6 +19,9 @@ public class ChatRoom {
     private Boolean isGroup;
     private Boolean isDeleted;
 
+    private String groupImageUrl;
+    private String groupImageBucketPath;
+
     @OneToOne
     private Message lastMessage;
 
