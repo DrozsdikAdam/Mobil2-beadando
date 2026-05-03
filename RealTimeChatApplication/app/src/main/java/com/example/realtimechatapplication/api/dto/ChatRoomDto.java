@@ -7,6 +7,7 @@ public class ChatRoomDto {
     private String name;
     private Boolean isGroup;
     private MessageResponseDto lastMessage;
+    private String profileImageUrl;
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -17,6 +18,9 @@ public class ChatRoomDto {
     public Boolean getIsGroup() { return isGroup; }
     public void setIsGroup(Boolean group) { isGroup = group; }
 
-    public MessageResponseDto getLastMessage() { return lastMessage; }
+    public MessageResponseDto lastMessage() { return lastMessage; }
     public void setLastMessage(MessageResponseDto lastMessage) { this.lastMessage = lastMessage; }
+
+    public String getProfileImageUrl() { return profileImageUrl; }
+    public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
 }
