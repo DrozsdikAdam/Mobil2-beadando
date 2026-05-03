@@ -13,7 +13,9 @@ public class MainViewModel extends ViewModel {
     
     private final MutableLiveData<UserModel> currentUser = new MutableLiveData<>();
     private final MutableLiveData<String> selectedChatPartnerName = new MutableLiveData<>();
+    private final MutableLiveData<String> selectedChatPartnerImageUrl = new MutableLiveData<>();
     private final MutableLiveData<String> selectedChatId = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isSelectedChatGroup = new MutableLiveData<>(false);
     private final MutableLiveData<List<MessageModel>> currentChatMessages = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
@@ -26,8 +28,16 @@ public class MainViewModel extends ViewModel {
         return selectedChatPartnerName;
     }
 
+    public LiveData<String> getSelectedChatPartnerImageUrl() {
+        return selectedChatPartnerImageUrl;
+    }
+
     public LiveData<String> getSelectedChatId() {
         return selectedChatId;
+    }
+
+    public LiveData<Boolean> getIsSelectedChatGroup() {
+        return isSelectedChatGroup;
     }
 
     public LiveData<List<MessageModel>> getCurrentChatMessages() {
@@ -50,8 +60,16 @@ public class MainViewModel extends ViewModel {
         this.selectedChatPartnerName.setValue(partnerName);
     }
 
+    public void setSelectedChatPartnerImageUrl(String imageUrl) {
+        this.selectedChatPartnerImageUrl.setValue(imageUrl);
+    }
+
     public void setSelectedChatId(String id) {
         this.selectedChatId.setValue(id);
+    }
+
+    public void setIsSelectedChatGroup(boolean isGroup) {
+        this.isSelectedChatGroup.setValue(isGroup);
     }
 
     public void setCurrentChatMessages(List<MessageModel> messages) {
