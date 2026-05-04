@@ -6,6 +6,11 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -34,6 +39,13 @@ public class SplashFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        ImageView logo = view.findViewById(R.id.logo);
+        TextView title = view.findViewById(R.id.app_title);
+        ProgressBar progressBar = view.findViewById(R.id.loading_progress);
+
+        //indítás
+        startAnimations(logo, title, progressBar);
+
         int destinationId = R.id.loginFragment;
         if (getArguments() != null && getArguments().containsKey(ARG_DESTINATION)) {
             destinationId = getArguments().getInt(ARG_DESTINATION);
@@ -41,14 +53,37 @@ public class SplashFragment extends Fragment {
 
         final int finalDestinationId = destinationId;
 
-        // 1 mp után navigáció a cél fragmentre, eltávolítva a Splash-t a backstack-ről
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (isAdded()) {
                 NavOptions navOptions = new NavOptions.Builder()
                         .setPopUpTo(R.id.splashFragment, true)
+                        .setEnterAnim(android.R.anim.fade_in)
+                        .setExitAnim(android.R.anim.fade_out)
                         .build();
                 Navigation.findNavController(view).navigate(finalDestinationId, null, navOptions);
             }
-        }, 1000);
+        }, 2500);
+    }
+
+    private void startAnimations(View logo, View title, View progressBar) {
+        logo.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(1000)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+
+        title.animate()
+                .alpha(1f)
+                .setDuration(800)
+                .setStartDelay(500)
+                .start();
+
+        progressBar.animate()
+                .alpha(1f)
+                .setDuration(500)
+                .setStartDelay(1000)
+                .start();
     }
 }
