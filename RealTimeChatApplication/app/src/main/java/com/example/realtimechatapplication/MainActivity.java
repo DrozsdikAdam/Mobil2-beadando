@@ -39,14 +39,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void applyColorTheme(int color) {
-        if (color == Color.parseColor("#007ACC")) setTheme(R.style.Theme_RealTimeChatApplication_Blue);
-        else if (color == Color.parseColor("#E53935")) setTheme(R.style.Theme_RealTimeChatApplication_Red);
-        else if (color == Color.parseColor("#43A047")) setTheme(R.style.Theme_RealTimeChatApplication_Green);
-        else if (color == Color.parseColor("#FB8C00")) setTheme(R.style.Theme_RealTimeChatApplication_Orange);
-        else if (color == Color.parseColor("#8E24AA")) setTheme(R.style.Theme_RealTimeChatApplication_Purple);
-        else if (color == Color.parseColor("#00897B")) setTheme(R.style.Theme_RealTimeChatApplication_Teal);
-        else if (color == Color.parseColor("#D81B60")) setTheme(R.style.Theme_RealTimeChatApplication_Pink);
-        else if (color == Color.parseColor("#3949AB")) setTheme(R.style.Theme_RealTimeChatApplication_Indigo);
+        switch (color) {
+            case 0xFF007ACC: setTheme(R.style.Theme_RealTimeChatApplication_Blue); break;
+            case 0xFFE53935: setTheme(R.style.Theme_RealTimeChatApplication_Red); break;
+            case 0xFF43A047: setTheme(R.style.Theme_RealTimeChatApplication_Green); break;
+            case 0xFFFB8C00: setTheme(R.style.Theme_RealTimeChatApplication_Orange); break;
+            case 0xFF8E24AA: setTheme(R.style.Theme_RealTimeChatApplication_Purple); break;
+            case 0xFF00897B: setTheme(R.style.Theme_RealTimeChatApplication_Teal); break;
+            case 0xFFD81B60: setTheme(R.style.Theme_RealTimeChatApplication_Pink); break;
+            case 0xFF3949AB: setTheme(R.style.Theme_RealTimeChatApplication_Indigo); break;
+            default: setTheme(R.style.Theme_RealTimeChatApplication_Blue); break;
+        }
     }
 
     @Override
