@@ -14,7 +14,7 @@ import com.example.realtimechatapplication.data.local.dao.MessageDao;
 import com.example.realtimechatapplication.data.local.entity.ChatRoomEntity;
 import com.example.realtimechatapplication.data.local.entity.MessageEntity;
 
-@Database(entities = {ChatRoomEntity.class, MessageEntity.class}, version = 1)
+@Database(entities = {ChatRoomEntity.class, MessageEntity.class}, version = 2)
 @TypeConverters({Converter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
