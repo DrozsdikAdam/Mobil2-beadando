@@ -55,11 +55,18 @@ public class ChatRepository {
                 }
 
                 List<ChatRoomEntity> chatRoomEntities = new ArrayList<>();
-                for (ChatRoomDto dto : chatRooms){
+                for (ChatRoomDto dto : response.body()) {
                     ChatRoomEntity entity = new ChatRoomEntity();
                     entity.setChatRoomId(dto.getId());
                     entity.setName(dto.getName());
                     entity.setGroup(dto.getIsGroup());
+                    entity.setProfileImageUrl(dto.getProfileImageUrl());
+
+                    if (dto.lastMessage() != null) {
+                        entity.setLastMessage(dto.lastMessage().getContent());
+                        entity.setLastMessageTimestamp(dto.lastMessage().getTimestamp());
+                    }
+
                     chatRoomEntities.add(entity);
                 }
 
