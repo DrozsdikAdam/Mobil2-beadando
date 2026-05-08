@@ -2,24 +2,29 @@ package com.example.realtimechatapplication;
 
 import android.app.Application;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.example.realtimechatapplication.api.RetrofitClient;
+import com.example.realtimechatapplication.api.dto.MessageResponseDto;
 import com.example.realtimechatapplication.data.local.AppDatabase;
 import com.example.realtimechatapplication.data.local.entity.ChatRoomEntity;
 import com.example.realtimechatapplication.data.repository.ChatRepository;
 import com.example.realtimechatapplication.models.MessageModel;
 import com.example.realtimechatapplication.models.UserModel;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainViewModel extends ViewModel {
+public class MainViewModel extends AndroidViewModel {
     
     private final MutableLiveData<UserModel> currentUser = new MutableLiveData<>();
     private final MutableLiveData<String> selectedChatPartnerName = new MutableLiveData<>();
@@ -29,11 +34,15 @@ public class MainViewModel extends ViewModel {
     private final MutableLiveData<List<MessageModel>> currentChatMessages = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<List<ChatRoomEntity>> chatRooms = new MutableLiveData<>();
+
     private final ChatRepository chatRepository;
     private final CompositeDisposable disposables = new CompositeDisposable();
+    private Disposable messageDisposable;
 
-    public MainViewModel(ChatRepository chatRepository, Application application, AppDatabase db) {
-        AppDatabase database = AppDatabase.getDatabase(application);
+    public MainViewModel(@NonNull Application application) {
+        super(application);
+        AppDatabase db = AppDatabase.getDatabase(application);
         this.chatRepository = new ChatRepository(db.chatRoomDao(), db.messageDao(), RetrofitClient.getApiService());
         loadChatRooms();
     }
@@ -43,8 +52,44 @@ public class MainViewModel extends ViewModel {
                 .getChatRooms()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(rooms -> chatRooms.setValue(rooms)));
+                .subscribe(rooms -> chatRooms.setValue(rooms), 
+                          throwable -> errorMessage.setValue("Hiba a szobák betöltésekor")));
+    }
 
+    public void loadMessages(UUID chatRoomId) {
+        if (messageDisposable != null && !messageDisposable.isDisposed()) {
+            disposables.remove(messageDisposable);
+            messageDisposable.dispose();
+        }
+
+        messageDisposable = chatRepository.getMessages(chatRoomId)
+                .subscribeOn(Schedulers.io())
+                .map(entities -> {
+                    List<MessageModel> models = new ArrayList<>();
+                    String myId = currentUser.getValue() != null ? currentUser.getValue().getUserId() : "";
+                    String myName = currentUser.getValue() != null ? currentUser.getValue().getUserName() : "";
+
+                    for (com.example.realtimechatapplication.data.local.entity.MessageEntity entity : entities) {
+                        models.add(MessageModel.fromEntity(entity, myId, myName));
+                    }
+                    return models;
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(models -> {
+                    currentChatMessages.setValue(models);
+                }, throwable -> {
+                    errorMessage.setValue("Hiba az üzenetek betöltésekor");
+                });
+        
+        disposables.add(messageDisposable);
+    }
+
+    public void syncMessages(UUID chatRoomId) {
+        chatRepository.syncMessages(chatRoomId);
+    }
+
+    public void saveMessage(MessageResponseDto dto){
+        chatRepository.saveMessage(dto);
     }
 
     public void refreshRooms() {
@@ -53,10 +98,9 @@ public class MainViewModel extends ViewModel {
 
     @Override
     protected void onCleared() {
+        super.onCleared();
         disposables.clear();
     }
-
-    MutableLiveData<List<ChatRoomEntity>> chatRooms = new MutableLiveData<>();
 
     public LiveData<List<ChatRoomEntity>> getChatRooms() { return chatRooms; }
 
