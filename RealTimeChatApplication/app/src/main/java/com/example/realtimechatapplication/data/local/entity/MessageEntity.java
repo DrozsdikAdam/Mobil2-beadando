@@ -1,5 +1,6 @@
 package com.example.realtimechatapplication.data.local.entity;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -8,6 +9,7 @@ import java.util.UUID;
 @Entity(tableName = "messages")
 public class MessageEntity {
     @PrimaryKey
+    @NonNull
     private UUID id;
     private String content;
     private String senderUsername;

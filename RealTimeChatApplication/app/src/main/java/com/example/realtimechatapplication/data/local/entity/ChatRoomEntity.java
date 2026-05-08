@@ -1,5 +1,6 @@
 package com.example.realtimechatapplication.data.local.entity;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -8,6 +9,7 @@ import java.util.UUID;
 @Entity(tableName = "chat_rooms")
 public class ChatRoomEntity {
     @PrimaryKey
+    @NonNull
     private UUID chatRoomId;
     private String name;
     private Boolean isGroup;
