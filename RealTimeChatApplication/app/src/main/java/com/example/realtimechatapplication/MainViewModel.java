@@ -1,13 +1,23 @@
 package com.example.realtimechatapplication;
 
+import android.app.Application;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.realtimechatapplication.api.RetrofitClient;
+import com.example.realtimechatapplication.data.local.AppDatabase;
+import com.example.realtimechatapplication.data.local.entity.ChatRoomEntity;
+import com.example.realtimechatapplication.data.repository.ChatRepository;
 import com.example.realtimechatapplication.models.MessageModel;
 import com.example.realtimechatapplication.models.UserModel;
 
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainViewModel extends ViewModel {
     
@@ -19,6 +29,36 @@ public class MainViewModel extends ViewModel {
     private final MutableLiveData<List<MessageModel>> currentChatMessages = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final ChatRepository chatRepository;
+    private final CompositeDisposable disposables = new CompositeDisposable();
+
+    public MainViewModel(ChatRepository chatRepository, Application application, AppDatabase db) {
+        AppDatabase database = AppDatabase.getDatabase(application);
+        this.chatRepository = new ChatRepository(db.chatRoomDao(), db.messageDao(), RetrofitClient.getApiService());
+        loadChatRooms();
+    }
+
+    private void loadChatRooms() {
+        disposables.add(chatRepository
+                .getChatRooms()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(rooms -> chatRooms.setValue(rooms)));
+
+    }
+
+    public void refreshRooms() {
+        chatRepository.refreshChatRooms();
+    }
+
+    @Override
+    protected void onCleared() {
+        disposables.clear();
+    }
+
+    MutableLiveData<List<ChatRoomEntity>> chatRooms = new MutableLiveData<>();
+
+    public LiveData<List<ChatRoomEntity>> getChatRooms() { return chatRooms; }
 
     public LiveData<UserModel> getCurrentUser() {
         return currentUser;
