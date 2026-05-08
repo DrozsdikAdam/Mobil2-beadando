@@ -11,6 +11,10 @@ public class ChatRoomEntity {
     private UUID chatRoomId;
     private String name;
     private Boolean isGroup;
+    private String lastMessage;
+    private String lastMessageTimestamp;
+    private String profileImageUrl;
+
 
     public UUID getChatRoomId() {
         return chatRoomId;
@@ -35,4 +39,14 @@ public class ChatRoomEntity {
     public void setGroup(Boolean group) {
         isGroup = group;
     }
+
+    public String getLastMessage() { return lastMessage; }
+    public void setLastMessage(String lastMessage) { this.lastMessage = lastMessage; }
+
+    public String getLastMessageTimestamp() { return lastMessageTimestamp; }
+    public void setLastMessageTimestamp(String lastMessageTimestamp) { this.lastMessageTimestamp = lastMessageTimestamp; }
+
+    public String getProfileImageUrl() { return profileImageUrl; }
+    public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
 }
+
