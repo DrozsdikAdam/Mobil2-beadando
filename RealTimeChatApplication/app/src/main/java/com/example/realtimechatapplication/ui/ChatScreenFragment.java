@@ -120,8 +120,20 @@ public class ChatScreenFragment extends Fragment {
         mainViewModel.getSelectedChatId().observe(getViewLifecycleOwner(), chatId -> {
             if (chatId != null) {
                 currentChatRoomId = UUID.fromString(chatId);
-                loadMessages();
+                mainViewModel.loadMessages(currentChatRoomId);
+                mainViewModel.syncMessages(currentChatRoomId);
                 setupWebSocket();
+            }
+        });
+
+        mainViewModel.getCurrentChatMessages().observe(getViewLifecycleOwner(), messages -> {
+            if (messages != null) {
+                messageList.clear();
+                messageList.addAll(messages);
+                if (messageAdapter != null) {
+                    messageAdapter.notifyDataSetChanged();
+                    recyclerViewMessages.scrollToPosition(messageList.size() - 1);
+                }
             }
         });
 
@@ -250,41 +262,6 @@ public class ChatScreenFragment extends Fragment {
         }
     }
 
-    private void loadMessages() {
-        if (currentChatRoomId == null) return;
-        
-        mainViewModel.setIsLoading(true);
-        RetrofitClient.getApiService().getMessages(currentChatRoomId, 0, 50).enqueue(new Callback<PageResponse<MessageResponseDto>>() {
-            @Override
-            public void onResponse(Call<PageResponse<MessageResponseDto>> call, Response<PageResponse<MessageResponseDto>> response) {
-                mainViewModel.setIsLoading(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    messageList.clear();
-                    List<MessageResponseDto> content = response.body().getContent();
-                    if (content != null) {
-                        for (MessageResponseDto dto : content) {
-                            messageList.add(MessageModel.fromDto(dto, currentUserId, currentUsername));
-                        }
-                        // Megfordítjuk, hogy a legújabb legyen alul (index növekszik időrendben)
-                        Collections.reverse(messageList);
-                    }
-                    
-                    if (messageAdapter == null) setupAdapter();
-                    if (messageAdapter != null) {
-                        messageAdapter.notifyDataSetChanged();
-                        recyclerViewMessages.scrollToPosition(messageList.size() - 1);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<PageResponse<MessageResponseDto>> call, Throwable t) {
-                mainViewModel.setIsLoading(false);
-                Log.e(TAG, "Failed to load messages", t);
-            }
-        });
-    }
-
     private void setupWebSocket() {
         if (webSocketManager == null) {
             webSocketManager = new WebSocketManager();
@@ -293,19 +270,7 @@ public class ChatScreenFragment extends Fragment {
             webSocketManager.setMessageListener(new WebSocketManager.MessageListener() {
                 @Override
                 public void onMessageReceived(MessageResponseDto dto) {
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            // Csak akkor adjuk hozzá, ha NEM mi küldtük (mivel mi már optimistán hozzáadtuk)
-                            if (!dto.getSenderUsername().equals(currentUsername)) {
-                                MessageModel model = MessageModel.fromDto(dto, currentUserId, currentUsername);
-                                messageList.add(model);
-                                if (messageAdapter != null) {
-                                    messageAdapter.notifyItemInserted(messageList.size() - 1);
-                                    recyclerViewMessages.scrollToPosition(messageList.size() - 1);
-                                }
-                            }
-                        });
-                    }
+                    mainViewModel.saveMessage(dto);
                 }
 
                 @Override
