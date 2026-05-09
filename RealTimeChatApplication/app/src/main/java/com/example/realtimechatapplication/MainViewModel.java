@@ -9,7 +9,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.realtimechatapplication.api.RetrofitClient;
+import com.example.realtimechatapplication.api.dto.ChatRoomDto;
 import com.example.realtimechatapplication.api.dto.MessageResponseDto;
+import com.example.realtimechatapplication.api.dto.UpdateRoomNameRequestDto;
 import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
 import com.example.realtimechatapplication.data.local.AppDatabase;
 import com.example.realtimechatapplication.data.local.entity.ChatRoomEntity;
@@ -100,6 +102,35 @@ public class MainViewModel extends AndroidViewModel {
 
     public void refreshRooms() {
         chatRepository.refreshChatRooms();
+    }
+
+    public void changeGroupName(UUID roomId, String newName) {
+        if (newName == null || newName.trim().isEmpty()) {
+            errorMessage.setValue("A név nem lehet üres!");
+            return;
+        }
+
+        isLoading.setValue(true);
+        UpdateRoomNameRequestDto request = new UpdateRoomNameRequestDto(newName.trim());
+
+        RetrofitClient.getApiService().updateRoomName(roomId, request).enqueue(new Callback<ChatRoomDto>() {
+            @Override
+            public void onResponse(@NonNull Call<ChatRoomDto> call, @NonNull Response<ChatRoomDto> response) {
+                isLoading.setValue(false);
+                if (response.isSuccessful()) {
+                    selectedChatPartnerName.setValue(newName.trim());
+                    refreshRooms();
+                } else {
+                    errorMessage.setValue("Nem sikerült megváltoztatni a nevet (Hiba: " + response.code() + ")");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ChatRoomDto> call, @NonNull Throwable t) {
+                isLoading.setValue(false);
+                errorMessage.setValue("Hálózati hiba: " + t.getMessage());
+            }
+        });
     }
 
     public void loadRecommendedUsers() {
