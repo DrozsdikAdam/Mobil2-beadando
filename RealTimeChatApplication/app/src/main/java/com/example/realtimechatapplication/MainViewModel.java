@@ -1,6 +1,7 @@
 package com.example.realtimechatapplication;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -9,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.realtimechatapplication.api.RetrofitClient;
 import com.example.realtimechatapplication.api.dto.MessageResponseDto;
+import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
 import com.example.realtimechatapplication.data.local.AppDatabase;
 import com.example.realtimechatapplication.data.local.entity.ChatRoomEntity;
 import com.example.realtimechatapplication.data.repository.ChatRepository;
@@ -23,6 +25,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainViewModel extends AndroidViewModel {
     
@@ -35,6 +40,7 @@ public class MainViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<List<ChatRoomEntity>> chatRooms = new MutableLiveData<>();
+    private final MutableLiveData<List<UserModel>> availableUsers = new MutableLiveData<>();
 
     private final ChatRepository chatRepository;
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -96,6 +102,63 @@ public class MainViewModel extends AndroidViewModel {
         chatRepository.refreshChatRooms();
     }
 
+    public void loadRecommendedUsers() {
+        RetrofitClient.getApiService().getRecommendedUsers().enqueue(new Callback<List<UserProfileResponseDto>>() {
+            @Override
+            public void onResponse(Call<List<UserProfileResponseDto>> call, Response<List<UserProfileResponseDto>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<UserModel> users = new ArrayList<>();
+                    for (UserProfileResponseDto dto : response.body()) {
+                        users.add(new UserModel(dto.getId().toString(), dto.getUsername(), dto.getProfileImageUrl()));
+                    }
+                    availableUsers.setValue(users);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<UserProfileResponseDto>> call, Throwable t) {
+                Log.e("MainViewModel", "Failed to load recommended users", t);
+            }
+        });
+    }
+
+    public void searchUsers(String query) {
+        RetrofitClient.getApiService().searchUsers(query).enqueue(new Callback<List<UserProfileResponseDto>>() {
+            @Override
+            public void onResponse(Call<List<UserProfileResponseDto>> call, Response<List<UserProfileResponseDto>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<UserModel> users = new ArrayList<>();
+                    for (UserProfileResponseDto dto : response.body()) {
+                        users.add(new UserModel(dto.getId().toString(), dto.getUsername(), dto.getProfileImageUrl()));
+                    }
+                    availableUsers.setValue(users);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<UserProfileResponseDto>> call, Throwable t) {
+                Log.e("MainViewModel", "Search failed", t);
+            }
+        });
+    }
+
+    public void loadAllUsers() {
+        RetrofitClient.getApiService().getAllUsers().enqueue(new Callback<List<UserProfileResponseDto>>() {
+            @Override
+            public void onResponse(Call<List<UserProfileResponseDto>> call, Response<List<UserProfileResponseDto>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<UserModel> users = new ArrayList<>();
+                    for (UserProfileResponseDto dto : response.body()) {
+                        users.add(new UserModel(dto.getId().toString(), dto.getUsername(), dto.getProfileImageUrl()));
+                    }
+                    availableUsers.setValue(users);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<UserProfileResponseDto>> call, Throwable t) {
+                Log.e("MainViewModel", "Failed to load all users", t);
+            }
+        });
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();
@@ -103,6 +166,8 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<ChatRoomEntity>> getChatRooms() { return chatRooms; }
+
+    public LiveData<List<UserModel>> getAvailableUsers() { return availableUsers; }
 
     public LiveData<UserModel> getCurrentUser() {
         return currentUser;
