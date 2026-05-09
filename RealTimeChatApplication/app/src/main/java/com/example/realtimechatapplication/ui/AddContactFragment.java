@@ -3,7 +3,6 @@ package com.example.realtimechatapplication.ui;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +22,6 @@ import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.api.RetrofitClient;
 import com.example.realtimechatapplication.api.dto.CreateRoomRequestDto;
 import com.example.realtimechatapplication.api.dto.CreateRoomResponseDto;
-import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
 import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.button.MaterialButton;
 
@@ -75,6 +73,14 @@ public class AddContactFragment extends Fragment {
         recyclerViewContacts.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewContacts.setAdapter(adapter);
 
+        mainViewModel.getAvailableUsers().observe(getViewLifecycleOwner(), users -> {
+            if (users != null) {
+                contactList.clear();
+                contactList.addAll(users);
+                adapter.notifyDataSetChanged();
+            }
+        });
+
         searchContact.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -82,7 +88,9 @@ public class AddContactFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() >= 2) {
-                    performSearch(s.toString());
+                    mainViewModel.searchUsers(s.toString());
+                } else if (s.length() == 0) {
+                    mainViewModel.loadRecommendedUsers();
                 }
             }
 
@@ -94,48 +102,7 @@ public class AddContactFragment extends Fragment {
             createChatWithSelected();
         });
 
-        loadRecommendedUsers();
-    }
-
-    private void performSearch(String query) {
-        RetrofitClient.getApiService().searchUsers(query).enqueue(new Callback<List<UserProfileResponseDto>>() {
-            @Override
-            public void onResponse(Call<List<UserProfileResponseDto>> call, Response<List<UserProfileResponseDto>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    updateList(response.body());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<UserProfileResponseDto>> call, Throwable t) {
-                Log.e(TAG, "Search failed", t);
-            }
-        });
-    }
-
-    private void loadRecommendedUsers() {
-        RetrofitClient.getApiService().getRecommendedUsers().enqueue(new Callback<List<UserProfileResponseDto>>() {
-            @Override
-            public void onResponse(Call<List<UserProfileResponseDto>> call, Response<List<UserProfileResponseDto>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    updateList(response.body());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<UserProfileResponseDto>> call, Throwable t) {
-                Log.e(TAG, "Failed to load recommended users", t);
-            }
-        });
-    }
-
-    private void updateList(List<UserProfileResponseDto> dtos) {
-        contactList.clear();
-        for (UserProfileResponseDto dto : dtos) {
-            UserModel user = new UserModel(dto.getId().toString(), dto.getUsername(), dto.getProfileImageUrl());
-            contactList.add(user);
-        }
-        adapter.notifyDataSetChanged();
+        mainViewModel.loadRecommendedUsers();
     }
 
     private void createChatWithSelected() {
@@ -144,7 +111,7 @@ public class AddContactFragment extends Fragment {
         for (UserModel user : contactList) {
             if (user.isSelected()) {
                 selectedIds.add(UUID.fromString(user.getUserId()));
-                name = user.getUserName(); // Egyszemélyes chat esetén ez lesz a név
+                name = user.getUserName();
             }
         }
 
