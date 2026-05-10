@@ -43,6 +43,7 @@ public class MainViewModel extends AndroidViewModel {
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<List<ChatRoomEntity>> chatRooms = new MutableLiveData<>();
     private final MutableLiveData<List<UserModel>> availableUsers = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isPartnerOnline = new MutableLiveData<>(false);
 
     private final ChatRepository chatRepository;
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -65,6 +66,9 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void loadMessages(UUID chatRoomId) {
+        // Reset online status when switching to a new chat
+        isPartnerOnline.setValue(false);
+
         if (messageDisposable != null && !messageDisposable.isDisposed()) {
             disposables.remove(messageDisposable);
             messageDisposable.dispose();
@@ -199,6 +203,10 @@ public class MainViewModel extends AndroidViewModel {
     public LiveData<List<ChatRoomEntity>> getChatRooms() { return chatRooms; }
 
     public LiveData<List<UserModel>> getAvailableUsers() { return availableUsers; }
+
+    public LiveData<Boolean> getIsPartnerOnline() { return isPartnerOnline; }
+
+    public void setPartnerOnline(boolean online) { isPartnerOnline.setValue(online); }
 
     public LiveData<UserModel> getCurrentUser() {
         return currentUser;

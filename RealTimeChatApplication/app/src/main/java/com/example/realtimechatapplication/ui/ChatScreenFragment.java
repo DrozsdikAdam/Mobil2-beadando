@@ -65,6 +65,7 @@ public class ChatScreenFragment extends Fragment {
     private ImageButton btnSend;
     private ImageButton btnBack;
     private TextView tvChatName;
+    private TextView tvPartnerStatus;
     private ShapeableImageView imgChatProfile;
 
     private MainViewModel mainViewModel;
@@ -103,6 +104,7 @@ public class ChatScreenFragment extends Fragment {
         btnSend = view.findViewById(R.id.btnSend);
         btnBack = view.findViewById(R.id.backButton);
         tvChatName = view.findViewById(R.id.chatPartnerName);
+        tvPartnerStatus = view.findViewById(R.id.tvPartnerStatus);
         imgChatProfile = view.findViewById(R.id.chatPartnerImage);
 
         messageList = new ArrayList<>();
@@ -143,6 +145,10 @@ public class ChatScreenFragment extends Fragment {
             if (name != null) tvChatName.setText(name);
         });
 
+        mainViewModel.getIsPartnerOnline().observe(getViewLifecycleOwner(), isOnline -> {
+            updateStatusDisplay(isOnline != null && isOnline);
+        });
+
         tvChatName.setOnClickListener(v -> {
             if (isGroupChat) {
                 showChangeNameDialog();
@@ -159,6 +165,7 @@ public class ChatScreenFragment extends Fragment {
             } else {
                 imgChatProfile.setOnClickListener(null);
             }
+            updateStatusDisplay(Boolean.TRUE.equals(mainViewModel.getIsPartnerOnline().getValue()));
         });
 
         mainViewModel.getSelectedChatPartnerImageUrl().observe(getViewLifecycleOwner(), imageUrl -> {
@@ -202,6 +209,18 @@ public class ChatScreenFragment extends Fragment {
                     }
                 }
             });
+        }
+    }
+
+    private void updateStatusDisplay(boolean isOnline) {
+        if (tvPartnerStatus == null) return;
+        
+        if (isGroupChat || !isOnline) {
+            tvPartnerStatus.setVisibility(View.GONE);
+        } else {
+            tvPartnerStatus.setVisibility(View.VISIBLE);
+            tvPartnerStatus.setText("Online");
+            tvPartnerStatus.setTextColor(getResources().getColor(android.R.color.holo_green_light, null));
         }
     }
 
@@ -293,6 +312,11 @@ public class ChatScreenFragment extends Fragment {
                 @Override
                 public void onMessageReceived(MessageResponseDto dto) {
                     mainViewModel.saveMessage(dto);
+                    
+                    // Ha a partnertől jött üzenet, online-nak jelöljük
+                    if (dto.getSenderUsername() != null && !dto.getSenderUsername().equals(currentUsername)) {
+                        mainViewModel.setPartnerOnline(true);
+                    }
                 }
 
                 @Override
