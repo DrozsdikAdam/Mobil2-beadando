@@ -22,6 +22,11 @@ public interface ApiService {
         @GET("/api/rooms")
         Call<List<ChatRoomDto>> getUserRooms();
 
+        @PUT("/api/rooms/{roomId}/name")
+        Call<ChatRoomDto> updateRoomName(
+                        @Path("roomId") UUID roomId,
+                        @Body UpdateRoomNameRequestDto request);
+
         @GET("/api/messages/{chatRoomId}")
         Call<PageResponse<MessageResponseDto>> getMessages(
                         @Path("chatRoomId") UUID chatRoomId,

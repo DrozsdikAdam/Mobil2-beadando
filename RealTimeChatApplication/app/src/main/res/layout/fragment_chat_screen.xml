@@ -55,11 +55,13 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvPartnerStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Online"
+                android:text="Offline"
                 android:textColor="?attr/uiColor"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:visibility="gone" />
         </LinearLayout>
 
         <ImageButton

@@ -4,6 +4,7 @@ import com.example.realtimechatbackend.dto.ChatRoomResponseDto;
 import com.example.realtimechatbackend.dto.CreateRoomRequestDto;
 import com.example.realtimechatbackend.dto.CreateRoomResponseDto;
 import com.example.realtimechatbackend.dto.MessageResponseDto;
+import com.example.realtimechatbackend.dto.UpdateGroupNameRequestDto;
 import com.example.realtimechatbackend.exception.InvalidGroupException;
 import com.example.realtimechatbackend.exception.UserNotFoundException;
 import com.example.realtimechatbackend.model.ChatRoom;
@@ -195,6 +196,43 @@ public class ChatRoomService {
         chatRoomRepository.save(chatRoom);
         
         return publicUrl;
+    }
+
+    @Transactional
+    public ChatRoomResponseDto updateGroupName(UUID roomId, UpdateGroupNameRequestDto request, String username) {
+        User currentUser = userRepository.findByUsernameAndIsDeletedFalse(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("A chatszoba nem található"));
+
+        if (!Boolean.TRUE.equals(chatRoom.getIsGroup())) {
+            throw new RuntimeException("Csak csoportos beszélgetések nevét lehet módosítani.");
+        }
+
+        boolean isMember = chatRoom.getUsers().stream()
+                .anyMatch(user -> user.getId().equals(currentUser.getId()));
+
+        if (!isMember) {
+            throw new RuntimeException("Nincs jogosultságod módosítani ezt a csoportot.");
+        }
+
+        if (request.getNewName() == null || request.getNewName().trim().isEmpty()) {
+            throw new RuntimeException("A csoport neve nem lehet üres.");
+        }
+
+        chatRoom.setName(request.getNewName().trim());
+        ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
+
+        MessageResponseDto lastMsgDto = savedRoom.getLastMessage() != null ? toMessageResponseDto(savedRoom.getLastMessage()) : null;
+
+        return ChatRoomResponseDto.builder()
+                .id(savedRoom.getId())
+                .name(savedRoom.getName())
+                .isGroup(savedRoom.getIsGroup())
+                .lastMessage(lastMsgDto)
+                .profileImageUrl(savedRoom.getGroupImageUrl())
+                .build();
     }
 
     private MessageResponseDto toMessageResponseDto(Message message) {

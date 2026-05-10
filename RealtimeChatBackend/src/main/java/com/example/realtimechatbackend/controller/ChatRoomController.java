@@ -3,6 +3,7 @@ package com.example.realtimechatbackend.controller;
 import com.example.realtimechatbackend.dto.ChatRoomResponseDto;
 import com.example.realtimechatbackend.dto.CreateRoomRequestDto;
 import com.example.realtimechatbackend.dto.CreateRoomResponseDto;
+import com.example.realtimechatbackend.dto.UpdateGroupNameRequestDto;
 import com.example.realtimechatbackend.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +47,20 @@ public class ChatRoomController {
         } catch (IOException e) {
             return ResponseEntity.internalServerError()
                     .body(Map.of("error", "Hiba történt a kép feldolgozása során."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{roomId}/name")
+    public ResponseEntity<?> updateGroupName(
+            @PathVariable UUID roomId,
+            @RequestBody UpdateGroupNameRequestDto request,
+            Principal principal) {
+        try {
+            ChatRoomResponseDto updatedRoom = chatRoomService.updateGroupName(roomId, request, principal.getName());
+            return ResponseEntity.ok(updatedRoom);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));

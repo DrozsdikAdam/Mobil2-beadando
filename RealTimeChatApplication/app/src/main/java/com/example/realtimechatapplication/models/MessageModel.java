@@ -1,6 +1,7 @@
 package com.example.realtimechatapplication.models;
 
 import com.example.realtimechatapplication.api.dto.MessageResponseDto;
+import com.example.realtimechatapplication.data.local.entity.MessageEntity;
 
 public class MessageModel {
 
@@ -68,8 +69,25 @@ public class MessageModel {
         if (dto.getSenderUsername().equals(currentUsername)) {
             sender.setUserId(currentUserId);
         } else {
-            // Ideiglenes ID a másik felhasználónak, ha nincs jobb megoldás
-            sender.setUserId("other_user_" + dto.getSenderUsername());
+            sender.setUserId("other_" + dto.getSenderUsername());
+        }
+
+        model.setSender(sender);
+        return model;
+    }
+
+    public static MessageModel fromEntity(MessageEntity entity, String currentUserId, String currentUsername) {
+        MessageModel model = new MessageModel();
+        model.setId(entity.getId().toString());
+        model.setContent(entity.getContent());
+
+        UserModel sender = new UserModel();
+        sender.setUserName(entity.getSenderUsername());
+
+        if (entity.getSenderUsername() != null && entity.getSenderUsername().equals(currentUsername)) {
+            sender.setUserId(currentUserId);
+        } else {
+            sender.setUserId("other_" + entity.getSenderUsername());
         }
 
         model.setSender(sender);

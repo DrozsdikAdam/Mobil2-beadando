@@ -1,7 +1,6 @@
 package com.example.realtimechatapplication.ui;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,6 @@ import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.api.RetrofitClient;
 import com.example.realtimechatapplication.api.dto.CreateRoomRequestDto;
 import com.example.realtimechatapplication.api.dto.CreateRoomResponseDto;
-import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
 import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.button.MaterialButton;
 
@@ -70,34 +68,21 @@ public class CreateGroupFragment extends Fragment {
         recyclerViewFriends.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewFriends.setAdapter(adapter);
 
+        mainViewModel.getAvailableUsers().observe(getViewLifecycleOwner(), users -> {
+            if (users != null) {
+                friendList.clear();
+                friendList.addAll(users);
+                adapter.notifyDataSetChanged();
+            }
+        });
+
         btnCreateGroup.setOnClickListener(v -> createGroup());
 
         loadAvailableUsers();
     }
 
     private void loadAvailableUsers() {
-        mainViewModel.setIsLoading(true);
-        RetrofitClient.getApiService().getAllUsers().enqueue(new Callback<List<UserProfileResponseDto>>() {
-            @Override
-            public void onResponse(Call<List<UserProfileResponseDto>> call,
-                    Response<List<UserProfileResponseDto>> response) {
-                mainViewModel.setIsLoading(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    friendList.clear();
-                    for (UserProfileResponseDto dto : response.body()) {
-                        friendList.add(new UserModel(dto.getId().toString(), dto.getUsername(), dto.getProfileImageUrl()));
-                    }
-                    adapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<UserProfileResponseDto>> call, Throwable t) {
-                mainViewModel.setIsLoading(false);
-                Log.e(TAG, "Failed to load users", t);
-                Toast.makeText(getContext(), "Nem sikerült betölteni a felhasználókat", Toast.LENGTH_SHORT).show();
-            }
-        });
+        mainViewModel.loadAllUsers();
     }
 
     private void createGroup() {
@@ -140,7 +125,6 @@ public class CreateGroupFragment extends Fragment {
             @Override
             public void onFailure(Call<CreateRoomResponseDto> call, Throwable t) {
                 mainViewModel.setIsLoading(false);
-                Log.e(TAG, "Group creation failed", t);
                 Toast.makeText(getContext(), "Hálózati hiba a csoport létrehozásakor", Toast.LENGTH_SHORT).show();
             }
         });

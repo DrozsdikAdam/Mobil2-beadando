@@ -24,6 +24,7 @@ import com.example.realtimechatapplication.adapters.ChatAdapter;
 import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.api.RetrofitClient;
 import com.example.realtimechatapplication.api.dto.ChatRoomDto;
+import com.example.realtimechatapplication.data.local.entity.ChatRoomEntity;
 import com.example.realtimechatapplication.models.ChatModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -64,6 +65,27 @@ public class ChatsFragment extends Fragment {
         chatAdapter = new ChatAdapter(chatList);
         recyclerView.setAdapter(chatAdapter);
 
+        mainViewModel.getChatRooms().observe(getViewLifecycleOwner(), rooms -> {
+            if (rooms != null) {
+                chatList.clear();
+                for (ChatRoomEntity entity : rooms) {
+                    // A 6 paraméteres konstruktor használata a hibás setterek helyett:
+                    ChatModel model = new ChatModel(
+                            entity.getChatRoomId(),
+                            entity.getName(),
+                            entity.getLastMessage() != null ? entity.getLastMessage() : "",
+                            formatTimestamp(entity.getLastMessageTimestamp()),
+                            entity.getProfileImageUrl(),
+                            entity.getGroup() != null && entity.getGroup()
+                    );
+                    chatList.add(model);
+                }
+                chatAdapter.notifyDataSetChanged();
+                mainViewModel.setIsLoading(false);
+            }
+        });
+
+
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         NavController navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
@@ -89,44 +111,7 @@ public class ChatsFragment extends Fragment {
 
     private void loadUserChats() {
         mainViewModel.setIsLoading(true);
-        RetrofitClient.getApiService().getUserRooms().enqueue(new Callback<List<ChatRoomDto>>() {
-            @Override
-            public void onResponse(Call<List<ChatRoomDto>> call, Response<List<ChatRoomDto>> response) {
-                mainViewModel.setIsLoading(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    chatList.clear();
-                    for (ChatRoomDto dto : response.body()) {
-                        String lastMsg = "";
-                        String timeStamp = "";
-                        if (dto.lastMessage() != null) {
-                            lastMsg = dto.lastMessage().getContent();
-                            if (dto.lastMessage().getTimestamp() != null) {
-                                timeStamp = formatTimestamp(dto.lastMessage().getTimestamp());
-                            }
-                        }
-                        chatList.add(new ChatModel(
-                                dto.getId(),
-                                dto.getName(),
-                                lastMsg,
-                                timeStamp,
-                                dto.getProfileImageUrl(),
-                                dto.getIsGroup() != null && dto.getIsGroup()
-                        ));
-                    }
-                    chatAdapter.notifyDataSetChanged();
-                } else {
-                    Log.e(TAG, "Failed to load chats: " + response.code());
-                    Toast.makeText(getContext(), "Nem sikerült betölteni a beszélgetéseket", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<ChatRoomDto>> call, Throwable t) {
-                mainViewModel.setIsLoading(false);
-                Log.e(TAG, "Network error", t);
-                Toast.makeText(getContext(), "Hálózati hiba a beszélgetések betöltésekor", Toast.LENGTH_SHORT).show();
-            }
-        });
+        mainViewModel.refreshRooms();
     }
 
     private void showAddOptionsDialog() {

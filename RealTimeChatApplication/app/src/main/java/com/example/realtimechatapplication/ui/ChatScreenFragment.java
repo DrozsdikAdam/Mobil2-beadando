@@ -18,6 +18,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,7 +31,6 @@ import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.api.RetrofitClient;
 import com.example.realtimechatapplication.api.WebSocketManager;
 import com.example.realtimechatapplication.api.dto.MessageResponseDto;
-import com.example.realtimechatapplication.api.dto.PageResponse;
 import com.example.realtimechatapplication.models.MessageModel;
 import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -39,9 +39,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -63,6 +65,7 @@ public class ChatScreenFragment extends Fragment {
     private ImageButton btnSend;
     private ImageButton btnBack;
     private TextView tvChatName;
+    private TextView tvPartnerStatus;
     private ShapeableImageView imgChatProfile;
 
     private MainViewModel mainViewModel;
@@ -101,6 +104,7 @@ public class ChatScreenFragment extends Fragment {
         btnSend = view.findViewById(R.id.btnSend);
         btnBack = view.findViewById(R.id.backButton);
         tvChatName = view.findViewById(R.id.chatPartnerName);
+        tvPartnerStatus = view.findViewById(R.id.tvPartnerStatus);
         imgChatProfile = view.findViewById(R.id.chatPartnerImage);
 
         messageList = new ArrayList<>();
@@ -120,13 +124,35 @@ public class ChatScreenFragment extends Fragment {
         mainViewModel.getSelectedChatId().observe(getViewLifecycleOwner(), chatId -> {
             if (chatId != null) {
                 currentChatRoomId = UUID.fromString(chatId);
-                loadMessages();
+                mainViewModel.loadMessages(currentChatRoomId);
+                mainViewModel.syncMessages(currentChatRoomId);
                 setupWebSocket();
+            }
+        });
+
+        mainViewModel.getCurrentChatMessages().observe(getViewLifecycleOwner(), messages -> {
+            if (messages != null) {
+                messageList.clear();
+                messageList.addAll(messages);
+                if (messageAdapter != null) {
+                    messageAdapter.notifyDataSetChanged();
+                    recyclerViewMessages.scrollToPosition(messageList.size() - 1);
+                }
             }
         });
 
         mainViewModel.getSelectedChatPartnerName().observe(getViewLifecycleOwner(), name -> {
             if (name != null) tvChatName.setText(name);
+        });
+
+        mainViewModel.getIsPartnerOnline().observe(getViewLifecycleOwner(), isOnline -> {
+            updateStatusDisplay(isOnline != null && isOnline);
+        });
+
+        tvChatName.setOnClickListener(v -> {
+            if (isGroupChat) {
+                showChangeNameDialog();
+            }
         });
 
         mainViewModel.getIsSelectedChatGroup().observe(getViewLifecycleOwner(), isGroup -> {
@@ -139,6 +165,7 @@ public class ChatScreenFragment extends Fragment {
             } else {
                 imgChatProfile.setOnClickListener(null);
             }
+            updateStatusDisplay(Boolean.TRUE.equals(mainViewModel.getIsPartnerOnline().getValue()));
         });
 
         mainViewModel.getSelectedChatPartnerImageUrl().observe(getViewLifecycleOwner(), imageUrl -> {
@@ -167,18 +194,15 @@ public class ChatScreenFragment extends Fragment {
                         // 1. Üzenet elküldése a WebSocketen
                         webSocketManager.sendMessage(text, currentChatRoomId);
                         
-                        // 2. Optimista frissítés: Azonnal hozzáadjuk a helyi listához
-                        MessageModel localMsg = new MessageModel();
-                        localMsg.setContent(text);
-                        UserModel me = new UserModel(currentUserId, currentUsername, "");
-                        localMsg.setSender(me);
+                        // 2. Optimista mentés Room-ba (azonnal megjelenik a UI-on az observer miatt)
+                        MessageResponseDto tempDto = new MessageResponseDto();
+                        tempDto.setId(UUID.randomUUID());
+                        tempDto.setContent(text);
+                        tempDto.setSenderUsername(currentUsername);
+                        tempDto.setChatRoomId(currentChatRoomId);
+                        tempDto.setTimestamp(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(new Date()));
                         
-                        messageList.add(localMsg);
-                        if (messageAdapter != null) {
-                            messageAdapter.notifyItemInserted(messageList.size() - 1);
-                            recyclerViewMessages.scrollToPosition(messageList.size() - 1);
-                        }
-                        
+                        mainViewModel.saveMessage(tempDto);
                         etMessage.setText("");
                     } else {
                         Toast.makeText(getContext(), "Nincs kapcsolat a szerverrel!", Toast.LENGTH_SHORT).show();
@@ -186,6 +210,35 @@ public class ChatScreenFragment extends Fragment {
                 }
             });
         }
+    }
+
+    private void updateStatusDisplay(boolean isOnline) {
+        if (tvPartnerStatus == null) return;
+        
+        if (isGroupChat || !isOnline) {
+            tvPartnerStatus.setVisibility(View.GONE);
+        } else {
+            tvPartnerStatus.setVisibility(View.VISIBLE);
+            tvPartnerStatus.setText("Online");
+            tvPartnerStatus.setTextColor(getResources().getColor(android.R.color.holo_green_light, null));
+        }
+    }
+
+    private void showChangeNameDialog() {
+        EditText input = new EditText(getContext());
+        input.setText(tvChatName.getText().toString());
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Csoportnév módosítása")
+                .setView(input)
+                .setPositiveButton("Mentés", (dialog, which) -> {
+                    String newName = input.getText().toString().trim();
+                    if (!newName.isEmpty()) {
+                        mainViewModel.changeGroupName(currentChatRoomId, newName);
+                    }
+                })
+                .setNegativeButton("Mégse", null)
+                .show();
     }
 
     private void uploadRoomImage(Uri imageUri) {
@@ -250,41 +303,6 @@ public class ChatScreenFragment extends Fragment {
         }
     }
 
-    private void loadMessages() {
-        if (currentChatRoomId == null) return;
-        
-        mainViewModel.setIsLoading(true);
-        RetrofitClient.getApiService().getMessages(currentChatRoomId, 0, 50).enqueue(new Callback<PageResponse<MessageResponseDto>>() {
-            @Override
-            public void onResponse(Call<PageResponse<MessageResponseDto>> call, Response<PageResponse<MessageResponseDto>> response) {
-                mainViewModel.setIsLoading(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    messageList.clear();
-                    List<MessageResponseDto> content = response.body().getContent();
-                    if (content != null) {
-                        for (MessageResponseDto dto : content) {
-                            messageList.add(MessageModel.fromDto(dto, currentUserId, currentUsername));
-                        }
-                        // Megfordítjuk, hogy a legújabb legyen alul (index növekszik időrendben)
-                        Collections.reverse(messageList);
-                    }
-                    
-                    if (messageAdapter == null) setupAdapter();
-                    if (messageAdapter != null) {
-                        messageAdapter.notifyDataSetChanged();
-                        recyclerViewMessages.scrollToPosition(messageList.size() - 1);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<PageResponse<MessageResponseDto>> call, Throwable t) {
-                mainViewModel.setIsLoading(false);
-                Log.e(TAG, "Failed to load messages", t);
-            }
-        });
-    }
-
     private void setupWebSocket() {
         if (webSocketManager == null) {
             webSocketManager = new WebSocketManager();
@@ -293,18 +311,11 @@ public class ChatScreenFragment extends Fragment {
             webSocketManager.setMessageListener(new WebSocketManager.MessageListener() {
                 @Override
                 public void onMessageReceived(MessageResponseDto dto) {
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            // Csak akkor adjuk hozzá, ha NEM mi küldtük (mivel mi már optimistán hozzáadtuk)
-                            if (!dto.getSenderUsername().equals(currentUsername)) {
-                                MessageModel model = MessageModel.fromDto(dto, currentUserId, currentUsername);
-                                messageList.add(model);
-                                if (messageAdapter != null) {
-                                    messageAdapter.notifyItemInserted(messageList.size() - 1);
-                                    recyclerViewMessages.scrollToPosition(messageList.size() - 1);
-                                }
-                            }
-                        });
+                    mainViewModel.saveMessage(dto);
+                    
+                    // Ha a partnertől jött üzenet, online-nak jelöljük
+                    if (dto.getSenderUsername() != null && !dto.getSenderUsername().equals(currentUsername)) {
+                        mainViewModel.setPartnerOnline(true);
                     }
                 }
 
