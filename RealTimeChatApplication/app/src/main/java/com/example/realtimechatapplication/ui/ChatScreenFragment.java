@@ -39,11 +39,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -73,7 +70,6 @@ public class ChatScreenFragment extends Fragment {
     private ShapeableImageView imgChatProfile;
 
     private MainViewModel mainViewModel;
-    private WebSocketManager webSocketManager;
     private String currentUserId;
     private String currentUsername;
     private UUID currentChatRoomId;
@@ -83,6 +79,8 @@ public class ChatScreenFragment extends Fragment {
     ApiService apiService;
     @Inject
     TokenManager tokenManager;
+    @Inject
+    WebSocketManager webSocketManager; // Injektált WebSocketManager
 
     private final ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -200,18 +198,10 @@ public class ChatScreenFragment extends Fragment {
                 String text = etMessage.getText().toString().trim();
                 if (!text.isEmpty() && currentChatRoomId != null) {
                     if (webSocketManager != null && webSocketManager.isConnected()) {
-                        // 1. Üzenet elküldése a WebSocketen
+                        // CSAK küldjük az üzenetet a WebSocketen.
+                        // A mentést a WebSocket-visszaigazolás (onMessageReceived) fogja elvégezni, 
+                        // így elkerüljük a dupla megjelenítést.
                         webSocketManager.sendMessage(text, currentChatRoomId);
-                        
-                        // 2. Optimista mentés Room-ba (azonnal megjelenik a UI-on az observer miatt)
-                        MessageResponseDto tempDto = new MessageResponseDto();
-                        tempDto.setId(UUID.randomUUID());
-                        tempDto.setContent(text);
-                        tempDto.setSenderUsername(currentUsername);
-                        tempDto.setChatRoomId(currentChatRoomId);
-                        tempDto.setTimestamp(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(new Date()));
-                        
-                        mainViewModel.saveMessage(tempDto);
                         etMessage.setText("");
                     } else {
                         Toast.makeText(getContext(), "Nincs kapcsolat a szerverrel!", Toast.LENGTH_SHORT).show();
@@ -313,27 +303,26 @@ public class ChatScreenFragment extends Fragment {
     }
 
     private void setupWebSocket() {
-        if (webSocketManager == null) {
-            webSocketManager = new WebSocketManager();
+        if (!webSocketManager.isConnected()) {
             webSocketManager.connect(tokenManager.getToken());
-            
-            webSocketManager.setMessageListener(new WebSocketManager.MessageListener() {
-                @Override
-                public void onMessageReceived(MessageResponseDto dto) {
-                    mainViewModel.saveMessage(dto);
-                    
-                    // Ha a partnertől jött üzenet, online-nak jelöljük
-                    if (dto.getSenderUsername() != null && !dto.getSenderUsername().equals(currentUsername)) {
-                        mainViewModel.setPartnerOnline(true);
-                    }
-                }
-
-                @Override
-                public void onError(Throwable throwable) {
-                    Log.e(TAG, "WebSocket error", throwable);
-                }
-            });
         }
+        
+        webSocketManager.setMessageListener(new WebSocketManager.MessageListener() {
+            @Override
+            public void onMessageReceived(MessageResponseDto dto) {
+                mainViewModel.saveMessage(dto);
+                
+                // Ha a partnertől jött üzenet, online-nak jelöljük
+                if (dto.getSenderUsername() != null && !dto.getSenderUsername().equals(currentUsername)) {
+                    mainViewModel.setPartnerOnline(true);
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Log.e(TAG, "WebSocket error", throwable);
+            }
+        });
         
         if (currentChatRoomId != null) {
             webSocketManager.subscribeToChat(currentChatRoomId);
@@ -343,8 +332,8 @@ public class ChatScreenFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (webSocketManager != null) {
-            webSocketManager.disconnect();
-        }
+        // A WebSocket kapcsolatot nem bontjuk le feltétlenül, 
+        // hogy a háttérben is megjöhessenek az üzenetek, de a listenert nullázhatjuk.
+        webSocketManager.setMessageListener(null);
     }
 }
