@@ -1,15 +1,16 @@
 plugins {
     alias(libs.plugins.android.application)
+    id 'com.google.dagger.hilt.android'
 }
 
 android {
     namespace 'com.example.realtimechatapplication'
-    compileSdk 36
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.example.realtimechatapplication"
         minSdk 24
-        targetSdk 36
+        targetSdk 35
         versionCode 1
         versionName "1.0"
 
@@ -58,4 +59,7 @@ dependencies {
     annotationProcessor 'androidx.room:room-compiler:2.6.1'
     implementation 'androidx.room:room-rxjava2:2.6.1'
 
+    // Hilt - Unified to 2.48 as requested
+    implementation 'com.google.dagger:hilt-android:2.48'
+    annotationProcessor 'com.google.dagger:hilt-android-compiler:2.48'
 }

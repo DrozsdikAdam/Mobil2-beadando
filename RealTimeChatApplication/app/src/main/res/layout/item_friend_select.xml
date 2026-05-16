@@ -15,9 +15,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent"
-        app:srcCompat="@drawable/ic_person"
-        app:tint="@color/light_gray" />
+        app:shapeAppearanceOverlay="@style/CircleImage"
+        app:srcCompat="@drawable/ic_person" />
 
     <TextView
         android:id="@+id/tvFriendName"
@@ -44,6 +43,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_add"
-        app:tint="@color/TextBlue" />
+        app:tint="@color/main_text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,6 +19,9 @@ import androidx.navigation.Navigation;
 
 import com.example.realtimechatapplication.R;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SplashFragment extends Fragment {
 
     private static final String ARG_DESTINATION = "destination_id";

@@ -8,12 +8,11 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.realtimechatapplication.api.RetrofitClient;
+import com.example.realtimechatapplication.api.ApiService;
 import com.example.realtimechatapplication.api.dto.ChatRoomDto;
 import com.example.realtimechatapplication.api.dto.MessageResponseDto;
 import com.example.realtimechatapplication.api.dto.UpdateRoomNameRequestDto;
 import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
-import com.example.realtimechatapplication.data.local.AppDatabase;
 import com.example.realtimechatapplication.data.local.entity.ChatRoomEntity;
 import com.example.realtimechatapplication.data.repository.ChatRepository;
 import com.example.realtimechatapplication.models.MessageModel;
@@ -23,6 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -31,6 +33,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@HiltViewModel
 public class MainViewModel extends AndroidViewModel {
     
     private final MutableLiveData<UserModel> currentUser = new MutableLiveData<>();
@@ -46,13 +49,15 @@ public class MainViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> isPartnerOnline = new MutableLiveData<>(false);
 
     private final ChatRepository chatRepository;
+    private final ApiService apiService;
     private final CompositeDisposable disposables = new CompositeDisposable();
     private Disposable messageDisposable;
 
-    public MainViewModel(@NonNull Application application) {
+    @Inject
+    public MainViewModel(ChatRepository chatRepository, ApiService apiService, Application application) {
         super(application);
-        AppDatabase db = AppDatabase.getDatabase(application);
-        this.chatRepository = new ChatRepository(db.chatRoomDao(), db.messageDao(), RetrofitClient.getApiService());
+        this.chatRepository = chatRepository;
+        this.apiService = apiService;
         loadChatRooms();
     }
 
@@ -117,7 +122,7 @@ public class MainViewModel extends AndroidViewModel {
         isLoading.setValue(true);
         UpdateRoomNameRequestDto request = new UpdateRoomNameRequestDto(newName.trim());
 
-        RetrofitClient.getApiService().updateRoomName(roomId, request).enqueue(new Callback<ChatRoomDto>() {
+        apiService.updateRoomName(roomId, request).enqueue(new Callback<ChatRoomDto>() {
             @Override
             public void onResponse(@NonNull Call<ChatRoomDto> call, @NonNull Response<ChatRoomDto> response) {
                 isLoading.setValue(false);
@@ -138,7 +143,7 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void loadRecommendedUsers() {
-        RetrofitClient.getApiService().getRecommendedUsers().enqueue(new Callback<List<UserProfileResponseDto>>() {
+        apiService.getRecommendedUsers().enqueue(new Callback<List<UserProfileResponseDto>>() {
             @Override
             public void onResponse(Call<List<UserProfileResponseDto>> call, Response<List<UserProfileResponseDto>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -157,7 +162,7 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void searchUsers(String query) {
-        RetrofitClient.getApiService().searchUsers(query).enqueue(new Callback<List<UserProfileResponseDto>>() {
+        apiService.searchUsers(query).enqueue(new Callback<List<UserProfileResponseDto>>() {
             @Override
             public void onResponse(Call<List<UserProfileResponseDto>> call, Response<List<UserProfileResponseDto>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -176,7 +181,7 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void loadAllUsers() {
-        RetrofitClient.getApiService().getAllUsers().enqueue(new Callback<List<UserProfileResponseDto>>() {
+        apiService.getAllUsers().enqueue(new Callback<List<UserProfileResponseDto>>() {
             @Override
             public void onResponse(Call<List<UserProfileResponseDto>> call, Response<List<UserProfileResponseDto>> response) {
                 if (response.isSuccessful() && response.body() != null) {

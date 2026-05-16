@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.adapters.FriendSelectAdapter;
 import com.example.realtimechatapplication.R;
-import com.example.realtimechatapplication.api.RetrofitClient;
+import com.example.realtimechatapplication.api.ApiService;
 import com.example.realtimechatapplication.api.dto.CreateRoomRequestDto;
 import com.example.realtimechatapplication.api.dto.CreateRoomResponseDto;
 import com.example.realtimechatapplication.models.UserModel;
@@ -29,10 +29,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@AndroidEntryPoint
 public class AddContactFragment extends Fragment {
 
     private static final String TAG = "AddContactFragment";
@@ -43,6 +47,9 @@ public class AddContactFragment extends Fragment {
     private FriendSelectAdapter adapter;
     private List<UserModel> contactList;
     private MainViewModel mainViewModel;
+
+    @Inject
+    ApiService apiService;
 
     public AddContactFragment() {
     }
@@ -126,7 +133,7 @@ public class AddContactFragment extends Fragment {
         request.setName(name);
         request.setUserIds(selectedIds);
 
-        RetrofitClient.getApiService().createRoom(request).enqueue(new Callback<CreateRoomResponseDto>() {
+        apiService.createRoom(request).enqueue(new Callback<CreateRoomResponseDto>() {
             @Override
             public void onResponse(Call<CreateRoomResponseDto> call, Response<CreateRoomResponseDto> response) {
                 mainViewModel.setIsLoading(false);

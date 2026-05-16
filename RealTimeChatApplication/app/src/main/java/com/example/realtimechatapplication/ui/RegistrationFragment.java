@@ -17,10 +17,11 @@ import androidx.navigation.Navigation;
 
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.R;
-import com.example.realtimechatapplication.api.RetrofitClient;
+import com.example.realtimechatapplication.api.ApiService;
 import com.example.realtimechatapplication.api.dto.AuthResponseDto;
 import com.example.realtimechatapplication.api.dto.RegisterRequestDto;
 import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
+import com.example.realtimechatapplication.di.TokenManager;
 import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -29,14 +30,23 @@ import org.json.JSONObject;
 
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@AndroidEntryPoint
 public class RegistrationFragment extends Fragment {
 
     private TextInputEditText usernameInput, emailInput, passwordInput;
     private MainViewModel mainViewModel;
+
+    @Inject
+    ApiService apiService;
+    @Inject
+    TokenManager tokenManager;
 
     private static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
 
@@ -93,12 +103,12 @@ public class RegistrationFragment extends Fragment {
 
         RegisterRequestDto registerRequest = new RegisterRequestDto(username, email, password);
 
-        RetrofitClient.getApiService().register(registerRequest).enqueue(new Callback<AuthResponseDto>() {
+        apiService.register(registerRequest).enqueue(new Callback<AuthResponseDto>() {
             @Override
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     String token = response.body().getToken();
-                    RetrofitClient.setAuthToken(token);
+                    tokenManager.setToken(token);
                     
                     // Most kérjük le a profiladatokat
                     fetchUserProfile(view);
@@ -126,7 +136,7 @@ public class RegistrationFragment extends Fragment {
     }
 
     private void fetchUserProfile(View view) {
-        RetrofitClient.getApiService().getCurrentUser().enqueue(new Callback<UserProfileResponseDto>() {
+        apiService.getCurrentUser().enqueue(new Callback<UserProfileResponseDto>() {
             @Override
             public void onResponse(Call<UserProfileResponseDto> call, Response<UserProfileResponseDto> response) {
                 mainViewModel.setIsLoading(false);

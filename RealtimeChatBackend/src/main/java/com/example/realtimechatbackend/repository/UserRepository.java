@@ -16,14 +16,14 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Boolean existsByEmailAndIsDeletedFalse(String email);
     List<User> findByUsernameContainingIgnoreCaseAndIsDeletedFalse(String username);
     
-    @Query("SELECT u FROM User u " +
+    @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.profileImage " +
             "WHERE u.username != :currentUsername AND u.isDeleted = false AND u NOT IN " +
            "(SELECT u2 FROM ChatRoom " +
             "c JOIN c.users u1 JOIN c.users u2 " +
             "WHERE c.isGroup = false AND u1.username = :currentUsername AND u2.username != :currentUsername)")
     List<User> findRecommendedUsers(@Param("currentUsername") String currentUsername);
 
-    @Query("SELECT u FROM User u " +
+    @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.profileImage " +
             "WHERE u.username != :currentUsername AND u.isDeleted = false " +
             "AND LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) " +
             "AND u NOT IN " +
@@ -32,5 +32,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             "WHERE c.isGroup = false AND u1.username = :currentUsername AND u2.username != :currentUsername)")
     List<User> searchUsersExcludingPrivateContacts(@Param("query") String query, @Param("currentUsername") String currentUsername);
 
-    List<User> findByUsernameNotAndIsDeletedFalse(String username);
+    @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.profileImage " +
+           "WHERE u.username != :username AND u.isDeleted = false")
+    List<User> findByUsernameNotAndIsDeletedFalse(@Param("username") String username);
 }

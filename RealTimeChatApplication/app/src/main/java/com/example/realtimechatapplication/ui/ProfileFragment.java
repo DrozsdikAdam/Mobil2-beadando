@@ -34,10 +34,11 @@ import androidx.navigation.Navigation;
 import com.bumptech.glide.Glide;
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.R;
-import com.example.realtimechatapplication.api.RetrofitClient;
+import com.example.realtimechatapplication.api.ApiService;
 import com.example.realtimechatapplication.api.dto.AuthResponseDto;
 import com.example.realtimechatapplication.api.dto.UpdateProfileRequestDto;
 import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
+import com.example.realtimechatapplication.di.TokenManager;
 import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
@@ -48,6 +49,9 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -55,6 +59,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@AndroidEntryPoint
 public class ProfileFragment extends Fragment {
 
     private ImageButton backButton;
@@ -68,6 +73,11 @@ public class ProfileFragment extends Fragment {
     private MainViewModel mainViewModel;
     private SwitchMaterial themeSwitch;
     private View colorPickerView;
+
+    @Inject
+    ApiService apiService;
+    @Inject
+    TokenManager tokenManager;
 
     private final ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -131,7 +141,7 @@ public class ProfileFragment extends Fragment {
         });
 
         view.findViewById(R.id.btnLogout).setOnClickListener(v -> {
-            RetrofitClient.setAuthToken(null);
+            tokenManager.setToken(null);
             mainViewModel.setCurrentUser(null);
             Navigation.findNavController(view).navigate(R.id.loginFragment);
         });
@@ -139,7 +149,7 @@ public class ProfileFragment extends Fragment {
 
     private void fetchFullProfile() {
         mainViewModel.setIsLoading(true);
-        RetrofitClient.getApiService().getCurrentUser().enqueue(new Callback<UserProfileResponseDto>() {
+        apiService.getCurrentUser().enqueue(new Callback<UserProfileResponseDto>() {
             @Override
             public void onResponse(Call<UserProfileResponseDto> call, Response<UserProfileResponseDto> response) {
                 mainViewModel.setIsLoading(false);
@@ -180,7 +190,7 @@ public class ProfileFragment extends Fragment {
             RequestBody requestFile = RequestBody.create(MediaType.parse(mimeType), file);
             MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
 
-            RetrofitClient.getApiService().uploadProfileImage(UUID.fromString(currentUser.getUserId()), body)
+            apiService.uploadProfileImage(UUID.fromString(currentUser.getUserId()), body)
                     .enqueue(new Callback<Map<String, String>>() {
                         @Override
                         public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
@@ -337,14 +347,14 @@ public class ProfileFragment extends Fragment {
         if (!newEmail.isEmpty()) request.setNewEmail(newEmail);
         if (!newPass.isEmpty()) request.setNewPassword(newPass);
 
-        RetrofitClient.getApiService().updateProfile(request).enqueue(new Callback<AuthResponseDto>() {
+        apiService.updateProfile(request).enqueue(new Callback<AuthResponseDto>() {
             @Override
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
                 mainViewModel.setIsLoading(false);
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Profil frissítve!", Toast.LENGTH_SHORT).show();
                     if (response.body() != null && response.body().getToken() != null && !response.body().getToken().isEmpty()) {
-                        RetrofitClient.setAuthToken(response.body().getToken());
+                        tokenManager.setToken(response.body().getToken());
                     }
                     UserModel user = mainViewModel.getCurrentUser().getValue();
                     if (user != null) {

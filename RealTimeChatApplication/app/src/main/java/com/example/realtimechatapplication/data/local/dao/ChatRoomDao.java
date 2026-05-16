@@ -13,7 +13,7 @@ import io.reactivex.Flowable;
 
 @Dao
 public interface ChatRoomDao {
-    @Query("SELECT * FROM chat_rooms")
+    @Query("SELECT * FROM chat_rooms ORDER BY lastMessageTimestamp ASC")
     Flowable<List<ChatRoomEntity>> getAllChatRooms();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
