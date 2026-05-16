@@ -58,7 +58,8 @@ public class ChatsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.chatList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         chatList = new ArrayList<>();
-        chatAdapter = new ChatAdapter(chatList);
+        // Átadom a ViewModelt az adapternek, hogy ne kelljen Castolnia a Contextet
+        chatAdapter = new ChatAdapter(chatList, mainViewModel);
         recyclerView.setAdapter(chatAdapter);
 
         mainViewModel.getChatRooms().observe(getViewLifecycleOwner(), rooms -> {
@@ -129,6 +130,7 @@ public class ChatsFragment extends Fragment {
     }
 
     private String formatTimestamp(String isoTimestamp) {
+        if (isoTimestamp == null || isoTimestamp.isEmpty()) return "";
         try {
             SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
             Date date = isoFormat.parse(isoTimestamp);
