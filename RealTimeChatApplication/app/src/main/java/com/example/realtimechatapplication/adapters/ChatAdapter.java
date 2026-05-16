@@ -5,8 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,9 +17,11 @@ import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder> {
     private List<ChatModel> chatList;
+    private MainViewModel mainViewModel;
 
-    public ChatAdapter(List<ChatModel> chatList) {
+    public ChatAdapter(List<ChatModel> chatList, MainViewModel mainViewModel) {
         this.chatList = chatList;
+        this.mainViewModel = mainViewModel;
     }
 
     @NonNull
@@ -49,15 +49,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         }
 
         holder.itemView.setOnClickListener(v -> {
-            AppCompatActivity activity = (AppCompatActivity) v.getContext();
-            MainViewModel mainViewModel = new ViewModelProvider(activity).get(MainViewModel.class);
-            
-            mainViewModel.setSelectedChatId(chat.getId().toString());
-            mainViewModel.setSelectedChatPartnerName(chat.getName());
-            mainViewModel.setSelectedChatPartnerImageUrl(chat.getProfileImageUrl());
-            mainViewModel.setIsSelectedChatGroup(chat.isGroup());
-
-            Navigation.findNavController(v).navigate(R.id.chatScreenFragment);
+            if (mainViewModel != null) {
+                mainViewModel.setSelectedChatId(chat.getId().toString());
+                mainViewModel.setSelectedChatPartnerName(chat.getName());
+                mainViewModel.setSelectedChatPartnerImageUrl(chat.getProfileImageUrl());
+                mainViewModel.setIsSelectedChatGroup(chat.isGroup());
+                Navigation.findNavController(v).navigate(R.id.chatScreenFragment);
+            }
         });
     }
 
