@@ -17,6 +17,7 @@ import com.example.realtimechatbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,23 +32,25 @@ public class UserService {
     private final String PasswordValidatorRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
 
 
+    @Transactional(readOnly = true)
     public List<UserProfileResponseDto> searchUsers(String query, String currentUsername){
-
         List<User> users = userRepository.searchUsersExcludingPrivateContacts(query, currentUsername);
-
-        return users.stream().map(user -> userProfileDtoMapper(user)).toList();
+        return users.stream().map(this::userProfileDtoMapper).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<UserProfileResponseDto> getRecommendedUsers(String username){
         return userRepository.findRecommendedUsers(username)
-                .stream().map(user -> userProfileDtoMapper(user)).toList();
+                .stream().map(this::userProfileDtoMapper).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<UserProfileResponseDto> getAllUsers(String currentUsername){
         return userRepository.findByUsernameNotAndIsDeletedFalse(currentUsername)
-                .stream().map(user -> userProfileDtoMapper(user)).toList();
+                .stream().map(this::userProfileDtoMapper).toList();
     }
 
+    @Transactional(readOnly = true)
     public CurrentUserProfileResponseDto getCurrentUser(String username){
         User user = userRepository.findByUsernameAndIsDeletedFalse(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
