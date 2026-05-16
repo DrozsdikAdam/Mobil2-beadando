@@ -18,10 +18,11 @@ import androidx.navigation.Navigation;
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.api.ApiService;
-import com.example.realtimechatapplication.api.RetrofitClient;
+
 import com.example.realtimechatapplication.api.dto.AuthResponseDto;
 import com.example.realtimechatapplication.api.dto.LoginRequestDto;
 import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
+import com.example.realtimechatapplication.di.TokenManager;
 import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -41,6 +42,8 @@ public class LoginFragment extends Fragment {
 
     @Inject
     ApiService apiService;
+    @Inject
+    TokenManager tokenManager;
 
     public LoginFragment() {
     }
@@ -89,7 +92,7 @@ public class LoginFragment extends Fragment {
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     String token = response.body().getToken();
-                    RetrofitClient.setAuthToken(token);
+                    tokenManager.setToken(token);
                     // Token megvan, most kérjük le a profiladatokat
                     fetchUserProfile(view);
                 } else {

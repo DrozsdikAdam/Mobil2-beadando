@@ -1,7 +1,6 @@
 package com.example.realtimechatapplication.di;
 
 import com.example.realtimechatapplication.api.ApiService;
-import com.example.realtimechatapplication.api.RetrofitClient;
 
 import javax.inject.Singleton;
 
@@ -28,18 +27,20 @@ public class NetworkModule {
     }
     @Singleton
     @Provides
-    public OkHttpClient provideOkHttpClient(HttpLoggingInterceptor interceptor){
-        OkHttpClient client = new OkHttpClient.Builder()
+    public OkHttpClient provideOkHttpClient(HttpLoggingInterceptor interceptor, TokenManager tokenManager){
+        return new OkHttpClient.Builder()
                 .addInterceptor(interceptor)
                 .addInterceptor(chain -> {
                     Request original = chain.request();
                     Request.Builder requestBuilder = original.newBuilder();
-                    requestBuilder.header("Authorization", "Bearer " + RetrofitClient.getAuthToken());
-                    Request request = requestBuilder.build();
-                    return chain.proceed(request);
+
+                    String token = tokenManager.getToken();
+                    if (token != null && !token.isEmpty()){
+                        requestBuilder.header("Authorization", "Bearer " + token);
+                    }
+                    return chain.proceed(requestBuilder.build());
                 })
                 .build();
-        return client;
     }
     @Singleton
     @Provides

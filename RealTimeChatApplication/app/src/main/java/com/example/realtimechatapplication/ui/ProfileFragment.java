@@ -35,10 +35,10 @@ import com.bumptech.glide.Glide;
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.api.ApiService;
-import com.example.realtimechatapplication.api.RetrofitClient;
 import com.example.realtimechatapplication.api.dto.AuthResponseDto;
 import com.example.realtimechatapplication.api.dto.UpdateProfileRequestDto;
 import com.example.realtimechatapplication.api.dto.UserProfileResponseDto;
+import com.example.realtimechatapplication.di.TokenManager;
 import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
@@ -76,6 +76,8 @@ public class ProfileFragment extends Fragment {
 
     @Inject
     ApiService apiService;
+    @Inject
+    TokenManager tokenManager;
 
     private final ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -139,7 +141,7 @@ public class ProfileFragment extends Fragment {
         });
 
         view.findViewById(R.id.btnLogout).setOnClickListener(v -> {
-            RetrofitClient.setAuthToken(null);
+            tokenManager.setToken(null);
             mainViewModel.setCurrentUser(null);
             Navigation.findNavController(view).navigate(R.id.loginFragment);
         });
@@ -352,7 +354,7 @@ public class ProfileFragment extends Fragment {
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Profil frissítve!", Toast.LENGTH_SHORT).show();
                     if (response.body() != null && response.body().getToken() != null && !response.body().getToken().isEmpty()) {
-                        RetrofitClient.setAuthToken(response.body().getToken());
+                        tokenManager.setToken(response.body().getToken());
                     }
                     UserModel user = mainViewModel.getCurrentUser().getValue();
                     if (user != null) {

@@ -29,9 +29,9 @@ import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.adapters.MessageAdapter;
 import com.example.realtimechatapplication.R;
 import com.example.realtimechatapplication.api.ApiService;
-import com.example.realtimechatapplication.api.RetrofitClient;
 import com.example.realtimechatapplication.api.WebSocketManager;
 import com.example.realtimechatapplication.api.dto.MessageResponseDto;
+import com.example.realtimechatapplication.di.TokenManager;
 import com.example.realtimechatapplication.models.MessageModel;
 import com.google.android.material.imageview.ShapeableImageView;
 
@@ -81,6 +81,8 @@ public class ChatScreenFragment extends Fragment {
 
     @Inject
     ApiService apiService;
+    @Inject
+    TokenManager tokenManager;
 
     private final ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -313,7 +315,7 @@ public class ChatScreenFragment extends Fragment {
     private void setupWebSocket() {
         if (webSocketManager == null) {
             webSocketManager = new WebSocketManager();
-            webSocketManager.connect(RetrofitClient.getAuthToken()); 
+            webSocketManager.connect(tokenManager.getToken());
             
             webSocketManager.setMessageListener(new WebSocketManager.MessageListener() {
                 @Override
