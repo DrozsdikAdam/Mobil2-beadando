@@ -17,6 +17,7 @@ import androidx.navigation.Navigation;
 
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.R;
+import com.example.realtimechatapplication.api.ApiService;
 import com.example.realtimechatapplication.api.RetrofitClient;
 import com.example.realtimechatapplication.api.dto.AuthResponseDto;
 import com.example.realtimechatapplication.api.dto.LoginRequestDto;
@@ -25,14 +26,21 @@ import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@AndroidEntryPoint
 public class LoginFragment extends Fragment {
 
     private TextInputEditText emailInput, passwordInput;
     private MainViewModel mainViewModel;
+
+    @Inject
+    ApiService apiService;
 
     public LoginFragment() {
     }
@@ -76,13 +84,12 @@ public class LoginFragment extends Fragment {
 
         LoginRequestDto loginRequest = new LoginRequestDto(email, password);
         
-        RetrofitClient.getApiService().login(loginRequest).enqueue(new Callback<AuthResponseDto>() {
+        apiService.login(loginRequest).enqueue(new Callback<AuthResponseDto>() {
             @Override
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     String token = response.body().getToken();
                     RetrofitClient.setAuthToken(token);
-                    
                     // Token megvan, most kérjük le a profiladatokat
                     fetchUserProfile(view);
                 } else {
@@ -100,7 +107,7 @@ public class LoginFragment extends Fragment {
     }
 
     private void fetchUserProfile(View view) {
-        RetrofitClient.getApiService().getCurrentUser().enqueue(new Callback<UserProfileResponseDto>() {
+        apiService.getCurrentUser().enqueue(new Callback<UserProfileResponseDto>() {
             @Override
             public void onResponse(Call<UserProfileResponseDto> call, Response<UserProfileResponseDto> response) {
                 mainViewModel.setIsLoading(false);

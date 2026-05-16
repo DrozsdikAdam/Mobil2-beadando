@@ -26,7 +26,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
- @Singleton
+@Singleton
 public class ChatRepository {
     private final ChatRoomDao chatRoomDao;
     private final MessageDao messageDao;
@@ -60,7 +60,7 @@ public class ChatRepository {
                 }
 
                 List<ChatRoomEntity> chatRoomEntities = new ArrayList<>();
-                for (ChatRoomDto dto : response.body()) {
+                for (ChatRoomDto dto : chatRooms) {
                     ChatRoomEntity entity = new ChatRoomEntity();
                     entity.setChatRoomId(dto.getId());
                     entity.setName(dto.getName());

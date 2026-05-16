@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,8 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.adapters.ChatAdapter;
 import com.example.realtimechatapplication.R;
-import com.example.realtimechatapplication.api.RetrofitClient;
-import com.example.realtimechatapplication.api.dto.ChatRoomDto;
 import com.example.realtimechatapplication.data.local.entity.ChatRoomEntity;
 import com.example.realtimechatapplication.models.ChatModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -35,10 +32,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class ChatsFragment extends Fragment {
 
     private static final String TAG = "ChatsFragment";
@@ -69,7 +65,6 @@ public class ChatsFragment extends Fragment {
             if (rooms != null) {
                 chatList.clear();
                 for (ChatRoomEntity entity : rooms) {
-                    // A 6 paraméteres konstruktor használata a hibás setterek helyett:
                     ChatModel model = new ChatModel(
                             entity.getChatRoomId(),
                             entity.getName(),

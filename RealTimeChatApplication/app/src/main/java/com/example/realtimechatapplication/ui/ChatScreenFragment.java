@@ -28,11 +28,11 @@ import com.bumptech.glide.Glide;
 import com.example.realtimechatapplication.MainViewModel;
 import com.example.realtimechatapplication.adapters.MessageAdapter;
 import com.example.realtimechatapplication.R;
+import com.example.realtimechatapplication.api.ApiService;
 import com.example.realtimechatapplication.api.RetrofitClient;
 import com.example.realtimechatapplication.api.WebSocketManager;
 import com.example.realtimechatapplication.api.dto.MessageResponseDto;
 import com.example.realtimechatapplication.models.MessageModel;
-import com.example.realtimechatapplication.models.UserModel;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import java.io.File;
@@ -47,6 +47,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -54,6 +57,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@AndroidEntryPoint
 public class ChatScreenFragment extends Fragment {
 
     private static final String TAG = "ChatScreenFragment";
@@ -74,6 +78,9 @@ public class ChatScreenFragment extends Fragment {
     private String currentUsername;
     private UUID currentChatRoomId;
     private boolean isGroupChat = false;
+
+    @Inject
+    ApiService apiService;
 
     private final ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -255,7 +262,7 @@ public class ChatScreenFragment extends Fragment {
             RequestBody requestFile = RequestBody.create(MediaType.parse(mimeType), file);
             MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
 
-            RetrofitClient.getApiService().uploadRoomImage(currentChatRoomId, body)
+            apiService.uploadRoomImage(currentChatRoomId, body)
                     .enqueue(new Callback<Map<String, String>>() {
                         @Override
                         public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
