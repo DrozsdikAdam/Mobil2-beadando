@@ -16,6 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.schedulers.Schedulers;
@@ -23,11 +26,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+ @Singleton
 public class ChatRepository {
     private final ChatRoomDao chatRoomDao;
     private final MessageDao messageDao;
     private final ApiService apiService;
 
+    @Inject
     public ChatRepository(ChatRoomDao chatRoomDao, MessageDao messageDao, ApiService apiService) {
         this.chatRoomDao = chatRoomDao;
         this.messageDao = messageDao;
